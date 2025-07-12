@@ -43,6 +43,15 @@ impl FileTreeRepository {
 
         return Ok(());
     }
+    
+    pub fn unstash_file(root: &String, stash_path: String) -> Result<()> {
+        use std::fs::remove_file as remove;
+        
+        let target = format!("{}/stash/{}", root, stash_path.trim_matches('/'));
+        remove(target)?;
+
+        return Ok(());
+    }
 
     pub fn tag_file(root: &String, stash_path: String, tag: String) -> Result<()> {
         use std::os::unix::fs::symlink;
