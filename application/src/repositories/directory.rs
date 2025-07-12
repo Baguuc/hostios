@@ -3,14 +3,14 @@ use crate::prelude::*;
 pub struct DirectoryRepository;
 
 impl DirectoryRepository {
-    pub fn read(path_to_read: &String, tags_root: &String, stash_root: &String) -> Result<domain::Directory> {
-        let mut directory = domain::Directory { name: String::new(), dirs: vec![], files: vec![] };
+    pub fn read(path_to_read: &String, tags_root: &String, stash_root: &String) -> Result<hostios_domain::Directory> {
+        let mut directory = hostios_domain::Directory { name: String::new(), dirs: vec![], files: vec![] };
         Self::read_inner(&mut directory, path_to_read, tags_root, stash_root)?;
 
         return Ok(directory);
     }
     
-    pub fn add_file_to_representation(representation: &mut domain::Directory, path: String, file: domain::File) {
+    pub fn add_file_to_representation(representation: &mut hostios_domain::Directory, path: String, file: hostios_domain::File) {
         let path = path.trim_matches('/');
 
         if path == String::new() {
@@ -39,7 +39,7 @@ impl DirectoryRepository {
                     .get_mut(idx)
                     .unwrap();
             } else {
-                let new_dir = domain::Directory {
+                let new_dir = hostios_domain::Directory {
                     name: part,
                     files: vec![],
                     dirs: vec![]
@@ -52,7 +52,7 @@ impl DirectoryRepository {
         current_dir.files.push(file);
     }
     
-    pub fn get_file_from_representation_mut(representation: &mut domain::Directory, path: String, file_name: String) -> Option<&mut domain::File> {
+    pub fn get_file_from_representation_mut(representation: &mut hostios_domain::Directory, path: String, file_name: String) -> Option<&mut hostios_domain::File> {
         let path = path.trim_matches('/');
 
         if path == String::new() {
@@ -89,7 +89,7 @@ impl DirectoryRepository {
                     .get_mut(idx)
                     .unwrap();
             } else {
-                let new_dir = domain::Directory {
+                let new_dir = hostios_domain::Directory {
                     name: part,
                     files: vec![],
                     dirs: vec![]
@@ -111,7 +111,7 @@ impl DirectoryRepository {
         return found_file;
     }
     
-    fn read_inner(representation: &mut domain::Directory, path_to_read: &String, tags_root: &String, stash_root: &String) -> Result<()> {
+    fn read_inner(representation: &mut hostios_domain::Directory, path_to_read: &String, tags_root: &String, stash_root: &String) -> Result<()> {
         use std::fs::{read_dir, read_link};
         use std::path::PathBuf;
 
@@ -156,7 +156,7 @@ impl DirectoryRepository {
                 if let Some(file) = Self::get_file_from_representation_mut(representation, sparent.clone(), sname.clone()) {
                     file.tags.push(tag);
                 } else {
-                    let file = domain::File {
+                    let file = hostios_domain::File {
                         name: sname,
                         tags: vec![tag]
                     };
