@@ -63,4 +63,14 @@ impl FileTreeRepository {
         symlink(to, at)?;
         return Ok(());   
     }
+    
+    pub fn untag_file(root: &String, stash_path: String, tag: String) -> Result<()> {
+        use std::fs::remove_file as remove;
+        
+        let tag_path_filename = stash_path.replace("/", "-");
+        let at = format!("{}/tags/{}/{}", root, tag, tag_path_filename);
+        
+        remove(at)?;
+        return Ok(());   
+    }
 }
