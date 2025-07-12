@@ -3,171 +3,107 @@ use crate::prelude::*;
 pub struct DirectoryRepository;
 
 impl DirectoryRepository {
-    pub fn read(path_to_read: &String, tags_root: &String, stash_root: &String) -> Result<hostios_domain::Directory> {
-        let mut directory = hostios_domain::Directory { name: String::new(), dirs: vec![], files: vec![] };
-        Self::read_inner(&mut directory, path_to_read, tags_root, stash_root)?;
-
-        return Ok(directory);
-    }
-    
-    pub fn add_file_to_representation(representation: &mut hostios_domain::Directory, path: String, file: hostios_domain::File) {
-        let path = path.trim_matches('/');
-
-        if path == String::new() {
-            representation.files.push(file);
-            return;
-        }
-
-        let split = path
-            .split("/")
-            .map(|c| c.to_string())
-            .collect::<Vec<String>>();
+    pub fn read_dir(root: &String, path: String) -> Result<hostios_domain::Directory> {
+        use std::fs::{read_dir,read_link};
+        use std::collections::HashMap;
+        use crate::utils::file::get_tags_root;
         
-        let mut current_dir = representation;
-        for part in split {
-            let mut found_idx: Option<usize> = None;
+        let mut tag_map: HashMap<String, Vec<String>> = HashMap::new();
 
-            for (idx,inner_dir) in current_dir.dirs.iter().enumerate() {
-                if inner_dir.name == part {
-                    found_idx = Some(idx);
-                    break;
-                }
-            }
-            
-            if let Some(idx) = found_idx {
-                current_dir = current_dir.dirs
-                    .get_mut(idx)
-                    .unwrap();
-            } else {
-                let new_dir = hostios_domain::Directory {
-                    name: part,
-                    files: vec![],
-                    dirs: vec![]
-                };
-                current_dir.dirs.push(new_dir);
-                current_dir = current_dir.dirs.last_mut().unwrap();
-            }
-        }
+        for entry in read_dir(get_tags_root(root))? {
+            let entry = entry?;
+            let path: String = W(entry.path())
+                .try_into()?;
 
-        current_dir.files.push(file);
-    }
-    
-    pub fn get_file_from_representation_mut(representation: &mut hostios_domain::Directory, path: String, file_name: String) -> Option<&mut hostios_domain::File> {
-        let path = path.trim_matches('/');
-
-        if path == String::new() {
-            let mut found_file = None;
-
-            for file in representation.files.iter_mut() {
-                if file.name == file_name {
-                    found_file = Some(file);
-                    break;
-                }
-            }
-
-            return found_file;
-        }
-
-        let split = path
-            .split("/")
-            .map(|c| c.to_string())
-            .collect::<Vec<String>>();
-        
-        let mut current_dir = representation;
-        for part in split {
-            let mut found_idx: Option<usize> = None;
-
-            for (idx,inner_dir) in current_dir.dirs.iter().enumerate() {
-                if inner_dir.name == part {
-                    found_idx = Some(idx);
-                    break;
-                }
-            }
-            
-            if let Some(idx) = found_idx {
-                current_dir = current_dir.dirs
-                    .get_mut(idx)
-                    .unwrap();
-            } else {
-                let new_dir = hostios_domain::Directory {
-                    name: part,
-                    files: vec![],
-                    dirs: vec![]
-                };
-                current_dir.dirs.push(new_dir);
-                current_dir = current_dir.dirs.last_mut().unwrap();
-            }
+            Self::read_tag(root, path, &mut tag_map)?;
         }
         
-        let mut found_file = None;
+        let tag_map = tag_map;
 
-        for file in current_dir.files.iter_mut() {
-            if file.name == file_name {
-                found_file = Some(file);
-                break;
-            }
-        }
-
-        return found_file;
+        return Self::read_stash(root, path, tag_map);
     }
-    
-    fn read_inner(representation: &mut hostios_domain::Directory, path_to_read: &String, tags_root: &String, stash_root: &String) -> Result<()> {
-        use std::fs::{read_dir, read_link};
-        use std::path::PathBuf;
 
-        let entries = read_dir(path_to_read)?;
-
-        for entry in entries {
+    fn read_tag(root: &String, path: String, tag_map: &mut std::collections::HashMap<String, Vec<String>>) -> Result<()> {
+        use std::fs::{read_dir,read_link};
+        use crate::utils::file::{strip_stash_root,get_tag_dir_path};
+         
+        for entry in read_dir(path)? {
             let entry = entry?;
             let path = entry.path();
 
-            if path.is_dir() {
-                let inner_path: String = W(path).try_into()?;
-                Self::read_inner(
-                    representation,
-                    &inner_path,
-                    tags_root,
-                    stash_root
-                )?;
-            } else if path.is_symlink() {
-                let tag_path = path
-                    .parent()
-                    .ok_or(Error::Generic("cannot retrieve parent".to_string()))?;
-                let tag: String = W(PathBuf::from(tag_path)).try_into()?;
-                let tag = tag.trim_start_matches(tags_root.as_str())
-                    .to_string();
-
-                let spath = PathBuf::from(read_link(path)?);
-                let sname = spath
-                    .file_name()
-                    .unwrap()
-                    .to_str()
-                    .unwrap()
-                    .to_string();
-                let sparent = spath
-                    .parent()
-                    .unwrap()
-                    .to_str()
-                    .unwrap()
-                    .to_string()
-                    .trim_start_matches(stash_root.as_str())
-                    .to_string();
+            if path.is_symlink() {
+                let tag = get_tag_dir_path(root, &W(path.clone()).try_into()?);
+                let stash_path = strip_stash_root(root, &W(read_link(path)?).try_into()?);
                 
-                if let Some(file) = Self::get_file_from_representation_mut(representation, sparent.clone(), sname.clone()) {
-                    file.tags.push(tag);
+                if let Some(entry) = tag_map.get_mut(&stash_path) {
+                    entry.push(tag);
                 } else {
-                    let file = hostios_domain::File {
-                        name: sname,
-                        tags: vec![tag]
-                    };
-                    Self::add_file_to_representation(representation, sparent, file);
+                    tag_map.insert(stash_path, vec![tag]);
                 }
-            } else {
-                // error
-                return Err(Error::Generic(String::from("wrong file type: has to be dir or symlink in tags/")));
+            }
+            else if path.is_dir() {
+                let dir_path: String = W(path)
+                    .try_into()?;
+
+                Self::read_tag(root, dir_path, tag_map)?;
             }
         }
 
         return Ok(());
+    }
+
+    fn read_stash(root: &String, path: String, tag_map: std::collections::HashMap<String, Vec<String>>) -> Result<hostios_domain::Directory> {
+        use std::fs::read_dir;
+        use hostios_domain::{File,FileType,Directory};
+        use crate::utils::file::{get_stash_root,strip_stash_root};
+        
+        let stash_root = get_stash_root(root);
+        let path = format!("{}/{}", stash_root, path.trim_matches('/'));
+        
+        let mut files = vec![];
+
+        for entry in read_dir(&path)? {
+            let entry = entry?;
+            let path = entry.path();
+            let path_string: String = W(entry.path()).try_into()?;
+            let stash_path = strip_stash_root(root, &path_string);
+            let name = stash_path
+                .clone()
+                .split("/")
+                .collect::<Vec<&str>>()
+                .pop()
+                .unwrap()
+                .to_string();
+            let tags = tag_map.get(&stash_path)
+                .unwrap_or(&vec![])
+                .clone();
+            let file_type = if path.is_file() { FileType::File } else { FileType::Directory };
+            
+            let file = File {
+                stash_path,
+                name,
+                tags,
+                file_type
+            };
+            files.push(file);
+        }
+
+        let full_path = strip_stash_root(root, &path);
+        let name = full_path
+            .clone()
+            .split("/")
+            .collect::<Vec<&str>>()
+            .pop()
+            .unwrap()
+            .to_string();
+        let files = files;
+
+        let directory = Directory {
+            full_path,
+            name,
+            files
+        };
+
+        return Ok(directory);
     }
 }
