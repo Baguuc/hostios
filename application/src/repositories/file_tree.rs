@@ -43,4 +43,15 @@ impl FileTreeRepository {
 
         return Ok(());
     }
+
+    pub fn tag_file(root: &String, stash_path: String, tag: String) -> Result<()> {
+        use std::os::unix::fs::symlink;
+        
+        let tag_path_filename = stash_path.replace("/", "-");
+        let to = format!("{}/stash/{}", root, stash_path);
+        let at = format!("{}/tags/{}/{}", root, tag, tag_path_filename);
+        
+        symlink(to, at)?;
+        return Ok(());   
+    }
 }
