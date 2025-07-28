@@ -1,0 +1,6 @@
+CREATE | MOVED,    tags/,              file     => move to stash
+CREATE | MOVED,    root/,              file     => move to stash
+CREATE | MOVED,    tags/<tag_name>,    file     => move to stash and tags
+DELETED,           stash/,             file     => remove all related tags
+DELETED,           stash/,             folder   => remove all related tags for inner files recursively
+else                                            => do nothing
