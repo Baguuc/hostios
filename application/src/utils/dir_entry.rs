@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-impl TryInto<String> for W<std::fs::DirEntry> {
+impl TryInto<String> for W<tokio::fs::DirEntry> {
     type Error = Error;
 
     fn try_into(self) -> Result<String> {
