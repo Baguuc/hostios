@@ -64,39 +64,39 @@ impl DirectoryRepository {
 
     async fn read_stash(root: &String, path: String, tag_map: std::collections::HashMap<String, Vec<String>>) -> Result<hostios_domain::Directory> {
         use tokio::fs::read_dir;
-        use hostios_domain::{File,FileType,Directory};
+        use hostios_domain::{Entry,EntryType,Directory};
         use crate::utils::file::{get_stash_root,strip_stash_root};
         
         let stash_root = get_stash_root(root);
         let full_path = format!("{}/{}", stash_root, path.trim_matches('/'));
         
-        let mut files = vec![];
+        let mut entries = vec![];
 
         let mut dir_content = read_dir(&full_path).await?;
         
         while let Some(entry) = dir_content.next_entry().await? {
             let path = entry.path();
             let path_string: String = W(entry.path()).try_into()?;
-            let stash_path = strip_stash_root(root, &path_string);
-            let name = stash_path
+            let full_path = strip_stash_root(root, &path_string);
+            let name = full_path
                 .clone()
                 .split("/")
                 .collect::<Vec<&str>>()
                 .pop()
                 .unwrap()
                 .to_string();
-            let tags = tag_map.get(&stash_path)
+            let tags = tag_map.get(&full_path)
                 .unwrap_or(&vec![])
                 .clone();
-            let file_type = if path.is_file() { FileType::File } else { FileType::Directory };
+            let entry_type = if path.is_file() { EntryType::File } else { EntryType::Directory };
             
-            let file = File {
-                stash_path,
+            let entry = Entry {
+                full_path,
                 name,
                 tags,
-                file_type
+                entry_type
             };
-            files.push(file);
+            entries.push(entry);
         }
 
         let full_path = strip_stash_root(root, &path);
@@ -107,12 +107,12 @@ impl DirectoryRepository {
             .pop()
             .unwrap()
             .to_string();
-        let files = files;
+        let entries = entries;
 
         let directory = Directory {
             full_path,
             name,
-            files
+            entries
         };
 
         return Ok(directory);
