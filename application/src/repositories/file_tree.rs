@@ -4,6 +4,8 @@ pub struct FileTreeRepository;
 
 impl FileTreeRepository {
     pub async fn read_dir(root: String, path: String) -> Result<hostios_domain::Directory> { crate::DirectoryRepository::read_dir(&root, path).await }
+    
+    pub async fn read_file_metadata(root: String, path: String) -> Result<hostios_domain::Entry> { crate::DirectoryRepository::read_file_metadata(&root, path).await }
 
     pub async fn stash_file(root: &String, file_path: String) -> Result<()> {
         use tokio::fs::rename;

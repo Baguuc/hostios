@@ -4,6 +4,42 @@ pub struct DirectoryRepository;
 
 impl DirectoryRepository {
     pub async fn read_dir(root: &String, path: String) -> Result<hostios_domain::Directory> {
+        let tag_map = Self::read_tag_map(root).await?;
+
+        return Self::read_stash(root, path, tag_map).await;
+    }
+    
+    pub async fn read_file_metadata(root: &String, full_path: String) -> Result<hostios_domain::Entry> {
+        use std::path::PathBuf;
+        use std::collections::HashMap;
+        use tokio::fs::{read_dir,read_link};
+        use crate::utils::file::{get_tags_root,get_stash_root};
+        use hostios_domain::{Entry,EntryType};
+        
+        let tag_map = Self::read_tag_map(root).await?;
+        
+        let name = PathBuf::from(&full_path)
+            .file_name()
+            .ok_or(Error::Generic(String::from("Cannot read file's name")))?
+            .to_str()
+            .ok_or(Error::Generic(String::from("Cannot read file's name")))?
+            .to_string();
+
+        let tags = tag_map.get(&full_path)
+            .unwrap_or(&vec![])
+            .clone();
+    
+        let entry = Entry {
+            full_path,
+            name,
+            tags,
+            entry_type: EntryType::File
+        };
+
+        return Ok(entry);
+    }
+
+    pub async fn read_tag_map(root: &String) -> Result<std::collections::HashMap<String, Vec<String>>> {
         use tokio::fs::{read_dir,read_link};
         use std::collections::HashMap;
         use crate::utils::file::get_tags_root;
@@ -25,7 +61,7 @@ impl DirectoryRepository {
         
         let tag_map = tag_map;
 
-        return Self::read_stash(root, path, tag_map).await;
+        return Ok(tag_map);
     }
     
     #[async_recursion::async_recursion]
