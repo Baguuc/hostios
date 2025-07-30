@@ -1,5 +1,7 @@
-pub mod file_tree;
+pub mod entry;
 pub mod directory;
+pub mod tag;
 
-pub use file_tree::*;
+pub use entry::*;
 pub use directory::*;
+pub use tag::*;

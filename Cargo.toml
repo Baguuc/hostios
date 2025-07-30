@@ -6,3 +6,4 @@ members = ["domain", "application", "presentation", "daemon"]
 serde = { version = "1", features = [ "derive" ] }
 serde_json = "1"
 thiserror = "2.0.12"
+sqlx = { version = "0.8.6", features = ["postgres", "runtime-tokio"] }

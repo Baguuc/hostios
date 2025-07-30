@@ -1,3 +1,3 @@
-pub mod dir_entry;
-pub mod path_buf;
-pub mod file;
+pub mod path;
+
+pub use path::Path;
