@@ -30,6 +30,7 @@ async fn run(args: Args) {
     use futures::executor::block_on;
     use clin::components::{header,success,error};
     use colored::Colorize;
+    use hostios_application::*;
     use crate::config::Config;
     use crate::error::error_if_necessary;
     
@@ -42,10 +43,13 @@ async fn run(args: Args) {
     let server = HttpServer::new(move || {
         let config = error_if_necessary(Config::read(args.clone().config.unwrap_or(String::from("./hostios.json"))));
         let pool = error_if_necessary(block_on(create_pool(config.database.clone())));
-        
+
         App::new()
-            .app_data(Data::new(pool))
+            .app_data(Data::new(pool.clone()))
             .app_data(Data::new(config.clone()))
+            .app_data(Data::new(TagRepository::new(pool.clone())))
+            .app_data(Data::new(DirectoryRepository::new(config.data_dir.clone(), pool.clone())))
+            .app_data(Data::new(EntryRepository::new(config.data_dir.clone(), pool)))
     });
 
     let binded_server = match server.bind(("0.0.0.0", config.port.clone())) {
