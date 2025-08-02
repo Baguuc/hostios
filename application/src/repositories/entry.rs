@@ -107,9 +107,9 @@ impl EntryRepository {
             .try_into()
             .map_err(|_| EntrySelectError::WrongPath)?;
         
-        let path_string = format!("{}/{}", self.data_dir, path_string);
+        let full_path_string = format!("{}/{}", self.data_dir, path_string);
         
-        let path = std::path::Path::new(&path_string);
+        let path = std::path::Path::new(&full_path_string);
         if !path.exists() {
             return Err(EntrySelectError::NotExist);
         } 
@@ -119,8 +119,8 @@ impl EntryRepository {
         } 
         
         // query file's tags
-        let sql = "SELECT name, description FROM file_tags ft INNER JOIN tags t ON ft.tag_name = t.name WHERE file_path = path;";
-
+        let sql = "SELECT t.name, t.description FROM file_tags ft INNER JOIN tags t ON ft.tag_name = t.name WHERE file_path = $1;";
+        
         let tags = sqlx::query_as(sql)
             .bind(&path_string)
             .fetch_all(&self.db_client)
