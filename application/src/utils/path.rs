@@ -4,7 +4,7 @@ pub struct Path(std::path::PathBuf);
 
 impl Path {
     pub fn parse(path: std::path::PathBuf) -> Result<Self> {
-        if Self::validate(&path) {
+        if !Self::validate(&path) {
             return Err(Error::Generic(String::from("provided path tries to escape the scope of the application")));
         }
 
