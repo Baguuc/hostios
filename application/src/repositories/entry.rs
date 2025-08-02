@@ -68,19 +68,35 @@ impl EntryRepository {
     ///
     /// Errors:
     /// + when the path is not a file;
+    /// + when the path do not exist;
     /// + when tag do not exist;
     /// + when tag is not added yet;
     ///
-    pub async fn remove_tag(self: &Self, path: String, tag: String) -> Result<(), EntryTagDeleteError>  {
+    pub async fn remove_tag(self: &Self, path: crate::utils::Path, tag: String) -> Result<(), EntryTagDeleteError>  {
         // throw error if tag not exist, otherwise skip
         let _ = crate::TagRepository::new(self.db_client.clone())
             .select(tag.clone())
             .await
             .map_err(|_| EntryTagDeleteError::TagNotExist)?;
         
+        let path_string: String = path
+            .try_into()
+            .map_err(|_| EntryTagDeleteError::WrongPath)?;
+
+        let full_path_string = format!("{}/{}", self.data_dir, path_string);
+        let path = std::path::Path::new(&full_path_string);
+        if !path.exists() {
+            return Err(EntryTagDeleteError::NotExist);
+        } 
+        
+        if !path.is_file() {
+            return Err(EntryTagDeleteError::NotAFile);
+        } 
+        
         let sql = "DELETE FROM file_tags WHERE file_path = $1 AND tag_name = $2;"; 
 
         let result = sqlx::query(sql)
+            .bind(path_string)
             .bind(tag)
             .execute(&self.db_client)
             .await
@@ -269,6 +285,15 @@ pub enum EntryTagInsertError {
 pub enum EntryTagDeleteError {
     #[error("provided tag is not added yet")]
     NotAddedYet,
+    
+    #[error("provided path is invalid")]
+    WrongPath,
+    
+    #[error("provided path do not exist")]
+    NotExist,
+    
+    #[error("provided path is not a file")]
+    NotAFile,
     
     #[error("provided tag do not exist")]
     TagNotExist,
