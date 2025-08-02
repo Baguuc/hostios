@@ -55,6 +55,7 @@ async fn run(args: Args) {
             .service(crate::routes::entry::select::controller)
             .service(crate::routes::entry::upload::controller)
             .service(crate::routes::entry::delete::controller)
+            .service(crate::routes::entry::move_entry::controller)
             .service(crate::routes::entry::insert_tag::controller)
             .service(crate::routes::entry::delete_tag::controller)
     });
