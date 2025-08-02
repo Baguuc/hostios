@@ -4,6 +4,8 @@ use crate::prelude::*;
 pub struct Config {
     pub port: u16,
     pub database: DatabaseConfig,
+    pub data_dir: String,
+    pub authios_url: String,
     pub service_permission: String
 }
 
@@ -22,7 +24,9 @@ impl Config {
         use serde_json::from_str;
 
         let content = read_to_string(path)?;
-        let parsed = from_str::<Self>(&content)?;
+        let mut parsed = from_str::<Self>(&content)?;
+
+        parsed.data_dir = parsed.data_dir.trim_end_matches('/').to_string();
 
         return Ok(parsed);
     }

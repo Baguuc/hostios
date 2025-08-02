@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 hostios-domain = { path = "../domain" }
 hostios-application = { path = "../application" }
+authios-sdk = { git = "https://github.com/Baguuc/authios" }
 
 actix-web = "4"
 thiserror = "2"
@@ -18,3 +19,4 @@ tokio = { workspace = true }
 clap = { version = "4.5.42", features = ["derive"] }
 clin = { git = "https://github.com/Baguuc/clin", version = "0.1.0" }
 colored = "3.0.0"
+actix-multipart = "0.7.2"

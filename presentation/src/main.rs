@@ -2,6 +2,8 @@ pub mod error;
 pub mod prelude;
 pub mod cli;
 pub mod config;
+pub mod routes;
+pub mod utils;
 
 use crate::prelude::*;
 

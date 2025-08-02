@@ -4,17 +4,21 @@ pub struct Path(std::path::PathBuf);
 
 impl Path {
     pub fn parse(path: std::path::PathBuf) -> Result<Self> {
-        use std::path::PathBuf;
-
-        if 
-            path.starts_with(PathBuf::from("..")) || 
-            path.starts_with(PathBuf::from("/")) || 
-            path.starts_with(PathBuf::from("~")) 
-        {
+        if Self::validate(&path) {
             return Err(Error::Generic(String::from("provided path tries to escape the scope of the application")));
         }
 
         return Ok(Self(path));
+    }
+    
+    pub fn validate(path: &std::path::PathBuf) -> bool {
+        use std::path::PathBuf;
+        
+        return !(
+            path.starts_with(PathBuf::from("..")) || 
+            path.starts_with(PathBuf::from("/")) || 
+            path.starts_with(PathBuf::from("~"))
+        );
     }
 }
 

@@ -43,13 +43,16 @@ async fn run(args: Args) {
     let server = HttpServer::new(move || {
         let config = error_if_necessary(Config::read(args.clone().config.unwrap_or(String::from("./hostios.json"))));
         let pool = error_if_necessary(block_on(create_pool(config.database.clone())));
+        
+        let _authios_sdk = error_if_necessary(authios_sdk::Sdk::create(config.authios_url.clone()));
 
         App::new()
-            .app_data(Data::new(pool.clone()))
-            .app_data(Data::new(config.clone()))
             .app_data(Data::new(TagRepository::new(pool.clone())))
             .app_data(Data::new(DirectoryRepository::new(config.data_dir.clone(), pool.clone())))
             .app_data(Data::new(EntryRepository::new(config.data_dir.clone(), pool)))
+            .app_data(Data::new(_authios_sdk))
+            .app_data(Data::new(config))
+            .service(crate::routes::entry::upload::controller)
     });
 
     let binded_server = match server.bind(("0.0.0.0", config.port.clone())) {
