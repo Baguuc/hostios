@@ -9,7 +9,7 @@ pub struct PathData {
    name: String
 }
 
-#[actix_web::post("/entry/{name}")]
+#[actix_web::post("/entries/{name}")]
 pub async fn controller(
     actix_multipart::form::MultipartForm(form): actix_multipart::form::MultipartForm<UploadForm>,
     path: actix_web::web::Path<PathData>,

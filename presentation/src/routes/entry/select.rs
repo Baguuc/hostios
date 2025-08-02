@@ -3,7 +3,7 @@ pub struct PathData {
    path: String 
 }
 
-#[actix_web::get("/entry/{path}")]
+#[actix_web::get("/entries/{path}")]
 pub async fn controller(
     req: actix_web::HttpRequest,
     path: actix_web::web::Path<PathData>,

@@ -4,7 +4,7 @@ pub struct PathData {
    tag_name: String
 }
 
-#[actix_web::delete("/entry/{path}/tags/{tag_name}")]
+#[actix_web::delete("/entries/{path}/tags/{tag_name}")]
 pub async fn controller(
     req: actix_web::HttpRequest,
     path: actix_web::web::Path<PathData>,
