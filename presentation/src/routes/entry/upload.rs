@@ -25,7 +25,6 @@ pub async fn controller(
     if !authorize(_authios_sdk, &req, config.service_permission.clone()).await {
         return HttpResponse::Unauthorized().into();
     }
-    println!("Authorized");
 
     let file_path = {
         let file_path = form.json.name.clone();
@@ -40,12 +39,10 @@ pub async fn controller(
             file_path
         )
     };
-    println!("Got file path");
 
     if std::path::Path::new(&file_path).exists() {
         return HttpResponse::Conflict().into();
     }
-    println!("Checked file path");
 
     return match form.file.file.persist(file_path) {
         Ok(_) => HttpResponse::Ok().into(),

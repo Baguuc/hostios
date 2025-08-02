@@ -53,6 +53,7 @@ async fn run(args: Args) {
             .app_data(Data::new(_authios_sdk))
             .app_data(Data::new(config))
             .service(crate::routes::entry::upload::controller)
+            .service(crate::routes::entry::select::controller)
     });
 
     let binded_server = match server.bind(("0.0.0.0", config.port.clone())) {
