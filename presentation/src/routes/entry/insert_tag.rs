@@ -1,13 +1,13 @@
 #[derive(serde::Deserialize)]
-pub struct JsonData {
+pub struct PathData {
    path: String,
    tag_name: String
 }
 
-#[actix_web::post("/entry/tag")]
+#[actix_web::post("/entry/{path}/tags/{tag_name}")]
 pub async fn controller(
     req: actix_web::HttpRequest,
-    json: actix_web::web::Json<JsonData>,
+    path: actix_web::web::Path<PathData>,
     config: actix_web::web::Data<crate::config::Config>,
     entry_repository: actix_web::web::Data<hostios_application::EntryRepository>,
     _authios_sdk: actix_web::web::Data<authios_sdk::Sdk>
@@ -21,12 +21,12 @@ pub async fn controller(
         return HttpResponse::Unauthorized().into();
     }
 
-    let entry_path = match Path::parse(PathBuf::from(json.path.clone())) {
+    let entry_path = match Path::parse(PathBuf::from(path.path.clone())) {
         Ok(entry_path) => entry_path,
         Err(_) => return HttpResponse::BadRequest().into()
     };
 
-    match entry_repository.insert_tag(entry_path, json.tag_name.clone()).await {
+    match entry_repository.insert_tag(entry_path, path.tag_name.clone()).await {
         Ok(_) => return HttpResponse::Ok().into(),
         Err(_) => return HttpResponse::NotFound().into()
     };

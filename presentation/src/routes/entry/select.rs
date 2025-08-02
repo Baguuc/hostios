@@ -1,12 +1,12 @@
 #[derive(serde::Deserialize)]
-pub struct QueryData {
+pub struct PathData {
    path: String 
 }
 
-#[actix_web::get("/entry")]
+#[actix_web::get("/entry/{path}")]
 pub async fn controller(
     req: actix_web::HttpRequest,
-    query: actix_web::web::Query<QueryData>,
+    path: actix_web::web::Path<PathData>,
     config: actix_web::web::Data<crate::config::Config>,
     entry_repository: actix_web::web::Data<hostios_application::EntryRepository>,
     _authios_sdk: actix_web::web::Data<authios_sdk::Sdk>
@@ -20,7 +20,7 @@ pub async fn controller(
         return HttpResponse::Unauthorized().into();
     }
 
-    let entry_path = match Path::parse(PathBuf::from(query.path.clone())) {
+    let entry_path = match Path::parse(PathBuf::from(path.path.clone())) {
         Ok(entry_path) => entry_path,
         Err(_) => return HttpResponse::BadRequest().into()
     };

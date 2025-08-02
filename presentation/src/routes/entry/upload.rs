@@ -1,18 +1,18 @@
-#[derive(Debug, serde::Deserialize)]
-struct Metadata {
-    name: String,
-}
-
 #[derive(Debug, actix_multipart::form::MultipartForm)]
 struct UploadForm {
     #[multipart(limit = "2GB")]
     file: actix_multipart::form::tempfile::TempFile,
-    json: actix_multipart::form::json::Json<Metadata>,
 }
 
-#[actix_web::post("/entry")]
+#[derive(serde::Deserialize)]
+pub struct PathData {
+   name: String
+}
+
+#[actix_web::post("/entry/{name}")]
 pub async fn controller(
     actix_multipart::form::MultipartForm(form): actix_multipart::form::MultipartForm<UploadForm>,
+    path: actix_web::web::Path<PathData>,
     req: actix_web::HttpRequest,
     config: actix_web::web::Data<crate::config::Config>,
     _authios_sdk: actix_web::web::Data<authios_sdk::Sdk>
@@ -27,7 +27,7 @@ pub async fn controller(
     }
 
     let file_path = {
-        let file_path = form.json.name.clone();
+        let file_path = path.name.clone();
         
         if !Path::validate(&PathBuf::from(&file_path)) { 
             return HttpResponse::BadRequest().into();
