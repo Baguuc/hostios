@@ -14,6 +14,7 @@ pub async fn controller(
     use actix_web::HttpResponse;
     use std::path::PathBuf;
     use hostios_application::utils::Path;
+    use hostios_application::EntrySelectError;
     use crate::utils::authios::authorize;
     
     if !authorize(_authios_sdk, &req, config.service_permission.clone()).await {
@@ -27,6 +28,10 @@ pub async fn controller(
 
     match entry_repository.select(entry_path).await {
         Ok(entry) => return HttpResponse::Ok().json(entry),
-        Err(_) => return HttpResponse::NotFound().into()
+        Err(error) => return match error {
+            EntrySelectError::NotExist => HttpResponse::NotFound().into(),
+            EntrySelectError::NotAFile => HttpResponse::Conflict().into(),
+            EntrySelectError::WrongPath => HttpResponse::BadRequest().into()
+        }
     };
 }

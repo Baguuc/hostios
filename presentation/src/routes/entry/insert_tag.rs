@@ -15,6 +15,7 @@ pub async fn controller(
     use actix_web::HttpResponse;
     use std::path::PathBuf;
     use hostios_application::utils::Path;
+    use hostios_application::EntryTagInsertError;
     use crate::utils::authios::authorize;
     
     if !authorize(_authios_sdk, &req, config.service_permission.clone()).await {
@@ -28,6 +29,12 @@ pub async fn controller(
 
     match entry_repository.insert_tag(entry_path, path.tag_name.clone()).await {
         Ok(_) => return HttpResponse::Ok().into(),
-        Err(_) => return HttpResponse::NotFound().into()
+        Err(error) => return match error {
+            EntryTagInsertError::WrongPath => HttpResponse::BadRequest().into(),
+            EntryTagInsertError::NotExist => HttpResponse::NotFound().body("NOT_EXIST"),
+            EntryTagInsertError::NotAFile => HttpResponse::Conflict().body("NOT_A_FILE"),
+            EntryTagInsertError::TagNotExist => HttpResponse::NotFound().body("TAG_NOT_EXIST"),
+            EntryTagInsertError::TagAlreadyAdded => HttpResponse::Conflict().body("TAG_ALREADY_ADDED")
+        }
     };
 }

@@ -15,6 +15,7 @@ pub async fn controller(
     use actix_web::HttpResponse;
     use std::path::PathBuf;
     use hostios_application::utils::Path;
+    use hostios_application::EntryTagDeleteError;
     use crate::utils::authios::authorize;
     
     if !authorize(_authios_sdk, &req, config.service_permission.clone()).await {
@@ -28,6 +29,12 @@ pub async fn controller(
 
     match entry_repository.remove_tag(entry_path, path.tag_name.clone()).await {
         Ok(_) => return HttpResponse::Ok().into(),
-        Err(_) => return HttpResponse::NotFound().into()
+        Err(error) => return match error {
+            EntryTagDeleteError::WrongPath => HttpResponse::BadRequest().into(),
+            EntryTagDeleteError::NotExist => HttpResponse::NotFound().body("NOT_EXIST"),
+            EntryTagDeleteError::NotAFile => HttpResponse::Conflict().body("NOT_A_FILE"),
+            EntryTagDeleteError::TagNotExist => HttpResponse::NotFound().body("TAG_NOT_EXIST"),
+            EntryTagDeleteError::NotAddedYet => HttpResponse::Conflict().body("NOT_ADDED_YET")
+        }
     };
 }

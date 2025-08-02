@@ -14,6 +14,7 @@ pub async fn controller(
     use actix_web::HttpResponse;
     use std::path::PathBuf;
     use hostios_application::utils::Path;
+    use hostios_application::EntryDeleteError;
     use crate::utils::authios::authorize;
     
     if !authorize(_authios_sdk, &req, config.service_permission.clone()).await {
@@ -22,11 +23,16 @@ pub async fn controller(
 
     let entry_path = match Path::parse(PathBuf::from(path.path.clone())) {
         Ok(entry_path) => entry_path,
-        Err(_) => return HttpResponse::BadRequest().into()
+        Err(_) => return HttpResponse::BadRequest().body("INVALID_PATH")
     };
 
     match entry_repository.delete(entry_path).await {
         Ok(_) => return HttpResponse::Ok().into(),
-        Err(_) => return HttpResponse::NotFound().into()
+        Err(error) => return match error {
+            EntryDeleteError::NotExist => HttpResponse::NotFound().into(),
+            EntryDeleteError::NotAFile => HttpResponse::BadRequest().body("NOT_A_FILE"),
+            EntryDeleteError::WrongPath => HttpResponse::BadRequest().body("INVALID_PATH"),
+            EntryDeleteError::CannotDelete => HttpResponse::InternalServerError().into()
+        }
     };
 }

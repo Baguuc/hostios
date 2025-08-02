@@ -20,6 +20,7 @@ pub async fn controller(
     use actix_web::HttpResponse;
     use std::path::PathBuf;
     use hostios_application::utils::Path;
+    use hostios_application::EntryMoveError;
     use crate::utils::authios::authorize;
     
     if !authorize(_authios_sdk, &req, config.service_permission.clone()).await {
@@ -38,6 +39,11 @@ pub async fn controller(
 
     match entry_repository.move_entry(entry_path, new_path).await {
         Ok(_) => return HttpResponse::Ok().into(),
-        Err(_) => return HttpResponse::NotFound().into()
+        Err(error) => return match error {
+            EntryMoveError::NotExist => HttpResponse::NotFound().into(),
+            EntryMoveError::NotAFile => HttpResponse::Conflict().into(),
+            EntryMoveError::WrongPath => HttpResponse::BadRequest().into(),
+            EntryMoveError::CannotMove => HttpResponse::InternalServerError().into()
+        }
     };
 }
