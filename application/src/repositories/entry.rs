@@ -210,7 +210,7 @@ impl EntryRepository {
         std::fs::remove_file(path)
             .map_err(|_| EntryDeleteError::CannotDelete)?;
         
-        let sql = "DELETE FROM file_tags WHERE path = $1";
+        let sql = "DELETE FROM file_tags WHERE file_path = $1";
         let _ = sqlx::query(sql)
             .bind(path_string)
             .execute(&self.db_client)
