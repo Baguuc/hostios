@@ -52,8 +52,9 @@ async fn run(args: Args) {
             .app_data(Data::new(EntryRepository::new(config.data_dir.clone(), pool)))
             .app_data(Data::new(_authios_sdk))
             .app_data(Data::new(config))
-            .service(crate::routes::entry::upload::controller)
             .service(crate::routes::entry::select::controller)
+            .service(crate::routes::entry::upload::controller)
+            .service(crate::routes::entry::delete::controller)
             .service(crate::routes::entry::insert_tag::controller)
             .service(crate::routes::entry::delete_tag::controller)
     });
