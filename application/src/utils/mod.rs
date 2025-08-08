@@ -1,3 +1,3 @@
 pub mod path;
 
-pub use path::Path;
+pub use path::{Path,DataDirPath};

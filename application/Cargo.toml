@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-async-recursion = "1.1.1"
 hostios-domain = { version = "0.1.0", path = "../domain" }
 
 thiserror.workspace = true
 sqlx.workspace = true
 tokio.workspace = true
+authios-sdk = { git = "https://github.com/Baguuc/authios", version = "0.1.0" }

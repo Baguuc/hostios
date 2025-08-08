@@ -1,4 +1,4 @@
-#[derive(Debug, serde::Serialize, sqlx::FromRow, Clone)]
+#[derive(Debug, serde::Serialize, serde::Deserialize, sqlx::FromRow, Clone)]
 pub struct Tag {
     name: String,
     description: String
