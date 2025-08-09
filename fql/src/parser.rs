@@ -8,13 +8,7 @@ pub enum Statement {
     MoveFile { path: Path, new_path: Path },
     MoveDir { path: Path, new_path: Path },
     DeleteDir(Path),
-    DeleteFile(Path),
-    CreateTag { name: String, description: String },
-    DeleteTag(String),
-    GrantTag { name: String, path: Path },
-    RevokeTag { name: String, path: Path },
-    QueryByPath(Path),
-    QueryByTag(String)
+    DeleteFile(Path)
 }
 
 impl Statement {
@@ -106,69 +100,18 @@ impl Statement {
 
                 Self::MoveDir { path, new_path }
             },
-            ("delete", "file") => {
-                let path = Path::parse(raw_data)
-                    .map_err(|error| StatementParseError::InvalidPath(error))?;
-
-                Self::DeleteFile(path)
-            },
             ("delete", "dir") => {
                 let path = Path::parse(raw_data)
                     .map_err(|error| StatementParseError::InvalidPath(error))?;
 
                 Self::DeleteDir(path)
             },
-            ("create", "tag") => {
-                let data = raw_data.split(", ").collect::<Vec<&str>>();
-                
-                if data.len() != 2 {
-                    return Err(StatementParseError::InvalidData(String::from("too much or too less tag values, have to be name and description separated by ',' character.")));
-                }
-
-                let name = data.get(0).unwrap().to_string();
-                let description = data.get(1).unwrap().to_string();
-
-                Self::CreateTag { name, description }
-            },
-            ("delete", "tag") => {
-                Self::DeleteTag(raw_data)
-            },
-            ("grant", "tag") => {
-                let data = raw_data.split(", ").collect::<Vec<&str>>();
-                
-                if data.len() != 2 {
-                    return Err(StatementParseError::InvalidData(String::from("too much or too less tag values, have to be name and path separated by ',' character.")));
-                }
-
-                let name = data.get(0).unwrap().to_string();
-                let path = Path::parse(data.get(1).unwrap().to_string())
-                    .map_err(|error| StatementParseError::InvalidPath(error))?;
-
-                Self::GrantTag { name, path }
-            },
-            ("revoke", "tag") => {
-                let data = raw_data.split(", ").collect::<Vec<&str>>();
-                
-                if data.len() != 2 {
-                    return Err(StatementParseError::InvalidData(String::from("too much or too less tag values, have to be name and path separated by ',' character.")));
-                }
-
-                let name = data.get(0).unwrap().to_string();
-                let path = Path::parse(data.get(1).unwrap().to_string())
-                    .map_err(|error| StatementParseError::InvalidPath(error))?;
-
-                Self::RevokeTag { name, path }
-            },
-            ("queryby", "path") => {
+            ("delete", "file") => {
                 let path = Path::parse(raw_data)
                     .map_err(|error| StatementParseError::InvalidPath(error))?;
 
-                Self::QueryByPath(path)
-            },
-            ("queryby", "tag") => {
-                Self::QueryByTag(raw_data)
-            },
-            _ => { return Err(StatementParseError::InvalidVerbAndEntity) }
+                Self::DeleteFile(path)
+            }
         };
         
         return Ok(statement);

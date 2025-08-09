@@ -116,11 +116,8 @@ impl Client {
                     .map_err(|_| QueryExecuteError::Fs(String::from("file not found")))?;
 
                 return Ok(QueryExecuteResult::Null);
-            },
-            _ => ()
+            }
         };
-
-        return Ok(QueryExecuteResult::Null);
     }
 }
 
