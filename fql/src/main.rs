@@ -5,6 +5,12 @@ pub mod entry;
 pub mod tag;
 
 fn main() {
-    let content = std::fs::read_to_string(".tags/dir1f%1dir2f%1test.txt").unwrap();
-    println!("{}", content);
+    let root = std::path::PathBuf::from("/www/hostios");
+    let client = client::Client::new(root);
+    
+    let result = client.execute(parser::Statement::parse("CREATE DIR tst-directory/test;").unwrap());
+    
+    if result.is_err() {
+        eprintln!("{:?}", result.unwrap_err());
+    }
 }

@@ -7,11 +7,27 @@ impl Client {
         return Self { root }
     }
     
-    pub fn execute(query: crate::parser::Statement) -> Result<QueryExecuteResult, QueryExecuteError> {
+    pub fn execute(self: &Self, query: crate::parser::Statement) -> Result<QueryExecuteResult, QueryExecuteError> {
+        use crate::parser::Statement;
+
+        match query {
+            Statement::CreateDir(path) => {
+                let path: std::path::PathBuf = path.into();
+                let full_path = self.root.join(path);
+
+                std::fs::create_dir(full_path)
+                    .map_err(|_| QueryExecuteError::Fs(String::from("cannot create dir")))?;
+
+                return Ok(QueryExecuteResult::Null);
+            }    
+            _ => ()
+        };
+
         return Ok(QueryExecuteResult::Null);
     }
 }
 
+#[derive(Debug)]
 pub enum QueryExecuteResult {
     Null,
     PathList(Vec<crate::path::Path>),
@@ -49,4 +65,8 @@ impl QueryExecuteResult {
     }
 }
 
-pub enum QueryExecuteError {}
+#[derive(thiserror::Error, Debug)]
+pub enum QueryExecuteError {
+    #[error("FS:{0}")] 
+    Fs(String)
+}
