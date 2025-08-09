@@ -83,7 +83,20 @@ impl Client {
                 let entries = entries_parsed;
 
                 return Ok(QueryExecuteResult::EntryList(entries));
-            }
+            },
+            Statement::MoveFile { path, new_path } | Statement::MoveDir { path, new_path } => {
+                let path: std::path::PathBuf = path.into();
+                let new_path: std::path::PathBuf = new_path.into();
+
+                let full_path = self.root.join(path);
+                let full_new_path = self.root.join(new_path);
+
+                tokio::fs::rename(full_path, full_new_path)
+                    .await
+                    .map_err(|_| QueryExecuteError::Fs(String::from("cannot move file")))?;
+
+                return Ok(QueryExecuteResult::Null);
+            },
             _ => ()
         };
 

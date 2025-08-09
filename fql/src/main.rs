@@ -9,7 +9,7 @@ async fn main() {
     let root = std::path::PathBuf::from("/www/hostios");
     let client = client::Client::new(root);
     
-    let statement = match parser::Statement::parse("READ DIR test-dir;") {
+    let statement = match parser::Statement::parse("MOVE FILE hello.txt, hello2.txt;") {
         Ok(statement) => statement,
         Err(error) => { eprintln!("{:?}", error); return; }
     };
