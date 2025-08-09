@@ -6,12 +6,14 @@ impl crate::DirectoriesUseCase {
     ///
     /// Errors:
     /// + when user is not authorized to use this function;
+    /// + when the path is invalid;
     /// + when the directory already exist;
     /// + when the database connection cannot be acquired;
     ///
     pub async fn create(
         params: &DirectoryCreateParams, 
-        _authios_sdk: authios_sdk::Sdk 
+        _authios_sdk: authios_sdk::Sdk,
+        fql_client: &fql::Client
     ) -> Result<(), DirectoryCreateError> {
         pub use authios_sdk::user::authorize::AuthorizeParams;
         
@@ -27,7 +29,10 @@ impl crate::DirectoriesUseCase {
             Err(_) | Ok(false) => return Err(Error::Unauthorized)
         };
 
-        crate::DirectoriesRepository::create(&params.path, &params.data_dir)
+        let statement = fql::Statement::parse(format!("CREATE DIR {};", params.path))
+            .map_err(|_| Error::InvalidPath)?;
+
+        fql_client.execute(statement)
             .await
             .map_err(|_| Error::AlreadyExist)?;
 
@@ -36,8 +41,7 @@ impl crate::DirectoriesUseCase {
 }
 
 pub struct DirectoryCreateParams {
-    path: crate::utils::Path,
-    data_dir: crate::utils::DataDirPath,
+    path: String,
     user_token: String
 }
 
@@ -48,5 +52,7 @@ pub enum DirectoryCreateError {
     #[error("UNAUTHORIZED")]
     Unauthorized,
     #[error("ALREADY_EXIST")]
-    AlreadyExist
+    AlreadyExist,
+    #[error("INVALID_PATH")]
+    InvalidPath
 }

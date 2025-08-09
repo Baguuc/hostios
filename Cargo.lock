@@ -1082,6 +1082,7 @@ name = "hostios-application"
 version = "0.1.0"
 dependencies = [
  "authios-sdk",
+ "fql",
  "hostios-domain",
  "sqlx",
  "thiserror",

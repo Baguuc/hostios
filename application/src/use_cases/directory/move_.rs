@@ -6,11 +6,13 @@ impl crate::DirectoriesUseCase {
     ///
     /// Errors:
     /// + when user is not authorized to use this function;
+    /// + when the path is invalid;
     /// + when the directory cannot be moved;
     ///
     pub async fn move_(
         params: &DirectoryMoveParams, 
-        _authios_sdk: authios_sdk::Sdk
+        _authios_sdk: authios_sdk::Sdk,
+        fql_client: &fql::Client
     ) -> Result<(), DirectoryMoveError> {
         pub use authios_sdk::user::authorize::AuthorizeParams;
         
@@ -26,7 +28,10 @@ impl crate::DirectoriesUseCase {
             Err(_) | Ok(false) => return Err(Error::Unauthorized)
         };
 
-        let _ = crate::DirectoriesRepository::move_(&params.file_path, &params.new_file_path, &params.data_dir)
+        let statement = fql::Statement::parse(format!("MOVE DIR {}, {};", params.path, params.new_path))
+            .map_err(|_| Error::InvalidPath)?;
+
+        fql_client.execute(statement)
             .await
             .map_err(|_| Error::CannotMove)?;
 
@@ -35,9 +40,8 @@ impl crate::DirectoriesUseCase {
 }
 
 pub struct DirectoryMoveParams {
-    file_path: crate::utils::Path,
-    new_file_path: crate::utils::Path,
-    data_dir: crate::utils::DataDirPath,
+    path: String,
+    new_path: String,
     user_token: String
 }
 
@@ -46,5 +50,7 @@ pub enum DirectoryMoveError {
     #[error("UNAUTHORIZED")]
     Unauthorized,
     #[error("CANNOT_MOVE")]
-    CannotMove
+    CannotMove,
+    #[error("INVALID_PATH")]
+    InvalidPath,
 }

@@ -10,3 +10,4 @@ thiserror.workspace = true
 sqlx.workspace = true
 tokio.workspace = true
 authios-sdk = { git = "https://github.com/Baguuc/authios", version = "0.1.0" }
+fql = { version = "0.1.0", path = "../fql" }

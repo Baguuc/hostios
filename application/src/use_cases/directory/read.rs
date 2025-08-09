@@ -6,19 +6,17 @@ impl crate::DirectoriesUseCase {
     ///
     /// Errors:
     /// + when user is not authorized to use this function;
+    /// + when the path is invalid;
+    /// + when the directory do not exist;
     ///
-    pub async fn read<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
+    pub async fn read(
         params: &DirectoryReadParams, 
         _authios_sdk: authios_sdk::Sdk,
-        client: A
-    ) -> Result<hostios_domain::Directory, DirectoryReadError> {
+        fql_client: &fql::Client
+    ) -> Result<Vec<hostios_domain::Entry>, DirectoryReadError> {
         pub use authios_sdk::user::authorize::AuthorizeParams;
         
         type Error = DirectoryReadError;
-
-        let mut client = client.acquire()
-            .await
-            .map_err(|_| Error::DatabaseConnection)?;
 
         let authorize_params = AuthorizeParams {
             token: params.user_token.clone(),
@@ -29,46 +27,20 @@ impl crate::DirectoriesUseCase {
             Ok(true) => (),
             Err(_) | Ok(false) => return Err(Error::Unauthorized)
         };
+        
+        let statement = fql::Statement::parse(format!("READ DIR {};", params.path))
+            .map_err(|_| Error::InvalidPath)?;
 
-        // won't error as the path checks if the file exists
-        let data = crate::DirectoriesRepository::read(&params.file_path, &params.data_dir)
+        let result = fql_client.execute(statement)
             .await
-            .unwrap();
+            .map_err(|_| Error::NotExist)?;
 
-        let mut entries = vec![];
-
-        for path in data {
-            let pathbuf = std::path::PathBuf::from(path.to_string());
-
-            if pathbuf.is_file() {
-                let file = crate::FilesRepository::retrieve(&path, &mut *client)
-                    .await
-                    // it won't error
-                    .unwrap();
-
-                entries.push(hostios_domain::Entry::File(file));
-            } else {
-                let directory = hostios_domain::Entry::Directory { full_path: path.to_string() };
-
-                entries.push(directory);
-            }
-        }
-
-        let joined_path = params.data_dir.join(&params.file_path);        
-        let entries = entries;
-
-        let data = hostios_domain::Directory {
-            full_path: joined_path.to_string_lossy().to_string(),
-            entries
-        };
-
-        return Ok(data);
+        return Ok(result.unwrap_entry_list());
     }
 }
 
 pub struct DirectoryReadParams {
-    file_path: crate::utils::Path,
-    data_dir: crate::utils::DataDirPath,
+    path: String,
     user_token: String
 }
 
@@ -76,6 +48,8 @@ pub struct DirectoryReadParams {
 pub enum DirectoryReadError {
     #[error("UNAUTHORIZED")]
     Unauthorized,
-    #[error("DATABASE_CONNECTION")]
-    DatabaseConnection
+    #[error("INVALID_PATH")]
+    InvalidPath,
+    #[error("NOT_EXIST")]
+    NotExist,
 }

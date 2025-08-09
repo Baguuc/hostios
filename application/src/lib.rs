@@ -7,9 +7,7 @@ pub mod utils;
 
 use repositories::{
     TagsRepository,
-    FileTagsRepository,
-    FilesRepository,
-    DirectoriesRepository
+    FileTagsRepository
 };
 pub use use_cases::{
     TagsUseCase,
