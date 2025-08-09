@@ -17,7 +17,7 @@ impl Client {
 
                 tokio::fs::create_dir(full_path)
                     .await
-                    .map_err(|_| QueryExecuteError::Fs(String::from("cannot create dir")))?;
+                    .map_err(|_| QueryExecuteError::Fs(String::from("parent dir not exist")))?;
 
                 return Ok(QueryExecuteResult::Null);
             },
@@ -93,7 +93,7 @@ impl Client {
 
                 tokio::fs::rename(full_path, full_new_path)
                     .await
-                    .map_err(|_| QueryExecuteError::Fs(String::from("cannot move")))?;
+                    .map_err(|_| QueryExecuteError::Fs(String::from("resource not exist")))?;
 
                 return Ok(QueryExecuteResult::Null);
             },
@@ -103,7 +103,7 @@ impl Client {
 
                 tokio::fs::remove_dir(full_path)
                     .await
-                    .map_err(|_| QueryExecuteError::Fs(String::from("directory not empty")))?;
+                    .map_err(|_| QueryExecuteError::Fs(String::from("directory not empty or not found")))?;
 
                 return Ok(QueryExecuteResult::Null);
             },
@@ -113,7 +113,7 @@ impl Client {
 
                 tokio::fs::remove_file(full_path)
                     .await
-                    .map_err(|_| QueryExecuteError::Fs(String::from("file not foundd")))?;
+                    .map_err(|_| QueryExecuteError::Fs(String::from("file not found")))?;
 
                 return Ok(QueryExecuteResult::Null);
             },
