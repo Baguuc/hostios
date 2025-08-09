@@ -8,9 +8,15 @@ fn main() {
     let root = std::path::PathBuf::from("/www/hostios");
     let client = client::Client::new(root);
     
-    let result = client.execute(parser::Statement::parse("CREATE DIR tst-directory/test;").unwrap());
+    let statement = match parser::Statement::parse("READ FILE test-dir/test.txt;") {
+        Ok(statement) => statement,
+        Err(error) => { eprintln!("{:?}", error); return; }
+    };
     
-    if result.is_err() {
-        eprintln!("{:?}", result.unwrap_err());
-    }
+    let result = match client.execute(statement) {
+        Ok(result) => result,
+        Err(error) => { eprintln!("{:?}", error); return; }
+    };
+    
+    println!("{:?}", result);
 }

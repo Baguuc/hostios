@@ -19,6 +19,15 @@ impl Client {
                     .map_err(|_| QueryExecuteError::Fs(String::from("cannot create dir")))?;
 
                 return Ok(QueryExecuteResult::Null);
+            },
+            Statement::ReadFile(path) => {
+                let path: std::path::PathBuf = path.into();
+                let full_path = self.root.join(path);
+
+                let content = std::fs::read_to_string(full_path)
+                    .map_err(|_| QueryExecuteError::Fs(String::from("file not exist")))?;
+
+                return Ok(QueryExecuteResult::String(content));
             }    
             _ => ()
         };
