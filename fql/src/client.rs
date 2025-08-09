@@ -30,7 +30,60 @@ impl Client {
                     .map_err(|_| QueryExecuteError::Fs(String::from("file not exist")))?;
 
                 return Ok(QueryExecuteResult::String(content));
-            }    
+            },
+            Statement::ReadDir(path) => {
+                let path: std::path::PathBuf = path.into();
+                let full_path = self.root.join(path);
+
+                let mut entries = tokio::fs::read_dir(full_path)
+                    .await
+                    .map_err(|_| QueryExecuteError::Fs(String::from("dir not exist")))?;
+                
+                let mut entries_parsed = vec![];
+
+                while let Some(entry) = entries.next_entry().await.map_err(|_| QueryExecuteError::Fs(String::from("cannot read entry")))? {
+                    let path = entry.path();
+
+                    if path.is_file() {
+                        // TODO: add tags reading
+                        let root_str = self.root
+                            .to_string_lossy()
+                            .to_string();
+                        let root_str = format!("{}/", root_str.trim_end_matches('/'));
+                        let root_str = root_str.as_str();
+                        
+                        let path = path
+                            .to_string_lossy()
+                            .to_string()
+                            .trim_start_matches(root_str)
+                            .to_string();
+
+                        let path = crate::path::Path::parse(path).unwrap();
+                        
+                        entries_parsed.push(crate::entry::Entry::File { path, tags: vec![] });
+                    }
+                    else if path.is_dir() {
+                        let root_str = self.root
+                            .to_string_lossy()
+                            .to_string();
+                        let root_str = format!("{}/", root_str.trim_end_matches('/'));
+                        let root_str = root_str.as_str();
+                        
+                        let path = path
+                            .to_string_lossy()
+                            .to_string()
+                            .trim_start_matches(root_str)
+                            .to_string();
+
+                        let path = crate::path::Path::parse(path).unwrap();
+                        entries_parsed.push(crate::entry::Entry::Directory { path });
+                    }
+                }
+                
+                let entries = entries_parsed;
+
+                return Ok(QueryExecuteResult::EntryList(entries));
+            }
             _ => ()
         };
 
