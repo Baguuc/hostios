@@ -7,7 +7,7 @@ impl Client {
         return Self { root }
     }
     
-    pub fn execute(self: &Self, query: crate::parser::Statement) -> Result<QueryExecuteResult, QueryExecuteError> {
+    pub async fn execute(self: &Self, query: crate::parser::Statement) -> Result<QueryExecuteResult, QueryExecuteError> {
         use crate::parser::Statement;
 
         match query {
@@ -15,7 +15,8 @@ impl Client {
                 let path: std::path::PathBuf = path.into();
                 let full_path = self.root.join(path);
 
-                std::fs::create_dir(full_path)
+                tokio::fs::create_dir(full_path)
+                    .await
                     .map_err(|_| QueryExecuteError::Fs(String::from("cannot create dir")))?;
 
                 return Ok(QueryExecuteResult::Null);
@@ -24,7 +25,8 @@ impl Client {
                 let path: std::path::PathBuf = path.into();
                 let full_path = self.root.join(path);
 
-                let content = std::fs::read_to_string(full_path)
+                let content = tokio::fs::read_to_string(full_path)
+                    .await
                     .map_err(|_| QueryExecuteError::Fs(String::from("file not exist")))?;
 
                 return Ok(QueryExecuteResult::String(content));

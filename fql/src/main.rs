@@ -4,16 +4,17 @@ pub mod path;
 pub mod entry;
 pub mod tag;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let root = std::path::PathBuf::from("/www/hostios");
     let client = client::Client::new(root);
     
-    let statement = match parser::Statement::parse("READ FILE test-dir/test.txt;") {
+    let statement = match parser::Statement::parse("CREATE DIR hellotokio/;") {
         Ok(statement) => statement,
         Err(error) => { eprintln!("{:?}", error); return; }
     };
     
-    let result = match client.execute(statement) {
+    let result = match client.execute(statement).await {
         Ok(result) => result,
         Err(error) => { eprintln!("{:?}", error); return; }
     };
