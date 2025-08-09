@@ -107,6 +107,16 @@ impl Client {
 
                 return Ok(QueryExecuteResult::Null);
             },
+            Statement::DeleteFile(path) => {
+                let path: std::path::PathBuf = path.into();
+                let full_path = self.root.join(path);
+
+                tokio::fs::remove_file(full_path)
+                    .await
+                    .map_err(|_| QueryExecuteError::Fs(String::from("file not foundd")))?;
+
+                return Ok(QueryExecuteResult::Null);
+            },
             _ => ()
         };
 
