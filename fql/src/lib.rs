@@ -1,4 +1,4 @@
 pub mod client;
-pub mod parser;
+pub mod statement;
 pub mod entry;
 pub mod path;

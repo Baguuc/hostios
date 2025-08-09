@@ -7,8 +7,8 @@ impl Client {
         return Self { root }
     }
     
-    pub async fn execute(self: &Self, query: crate::parser::Statement) -> Result<QueryExecuteResult, QueryExecuteError> {
-        use crate::parser::Statement;
+    pub async fn execute(self: &Self, query: crate::statement::Statement) -> Result<QueryExecuteResult, QueryExecuteError> {
+        use crate::statement::Statement;
 
         match query {
             Statement::CreateDir(path) => {

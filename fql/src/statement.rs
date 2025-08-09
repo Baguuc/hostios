@@ -111,7 +111,8 @@ impl Statement {
                     .map_err(|error| StatementParseError::InvalidPath(error))?;
 
                 Self::DeleteFile(path)
-            }
+            },
+            (_, _) => return Err(StatementParseError::InvalidVerbAndEntity)
         };
         
         return Ok(statement);
