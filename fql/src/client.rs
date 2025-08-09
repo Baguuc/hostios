@@ -93,7 +93,17 @@ impl Client {
 
                 tokio::fs::rename(full_path, full_new_path)
                     .await
-                    .map_err(|_| QueryExecuteError::Fs(String::from("cannot move file")))?;
+                    .map_err(|_| QueryExecuteError::Fs(String::from("cannot move")))?;
+
+                return Ok(QueryExecuteResult::Null);
+            },
+            Statement::DeleteDir(path) => {
+                let path: std::path::PathBuf = path.into();
+                let full_path = self.root.join(path);
+
+                tokio::fs::remove_dir(full_path)
+                    .await
+                    .map_err(|_| QueryExecuteError::Fs(String::from("directory not empty")))?;
 
                 return Ok(QueryExecuteResult::Null);
             },
