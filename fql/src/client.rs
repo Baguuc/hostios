@@ -45,7 +45,6 @@ impl Client {
                     let path = entry.path();
 
                     if path.is_file() {
-                        // TODO: add tags reading
                         let root_str = self.root
                             .to_string_lossy()
                             .to_string();
@@ -60,7 +59,7 @@ impl Client {
 
                         let path = crate::path::Path::parse(path).unwrap();
                         
-                        entries_parsed.push(crate::entry::Entry::File { path, tags: vec![] });
+                        entries_parsed.push(crate::entry::Entry::File(path));
                     }
                     else if path.is_dir() {
                         let root_str = self.root
@@ -76,7 +75,7 @@ impl Client {
                             .to_string();
 
                         let path = crate::path::Path::parse(path).unwrap();
-                        entries_parsed.push(crate::entry::Entry::Directory { path });
+                        entries_parsed.push(crate::entry::Entry::Directory(path));
                     }
                 }
                 
@@ -124,7 +123,6 @@ impl Client {
 #[derive(Debug)]
 pub enum QueryExecuteResult {
     Null,
-    PathList(Vec<crate::path::Path>),
     EntryList(Vec<crate::entry::Entry>),
     String(String)
 }
@@ -134,13 +132,6 @@ impl QueryExecuteResult {
         return match self {
             Self::Null => (),
             _ => panic!("Cannot unwrap Null value!")
-        };
-    }
-    
-    pub fn unwrap_path_list(self) -> Vec<crate::path::Path> {
-        return match self {
-            Self::PathList(list) => list,
-            _ => panic!("Cannot unwrap PathList value!")
         };
     }
     
