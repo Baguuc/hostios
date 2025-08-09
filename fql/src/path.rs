@@ -22,3 +22,9 @@ pub enum PathParseError {
 impl ToString for Path {
     fn to_string(self: &Self) -> String { self.0.clone() }
 }
+
+impl From<Path> for std::path::PathBuf {
+    fn from(path: Path) -> std::path::PathBuf {
+        return Self::from(path.0);
+    }
+}
