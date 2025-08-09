@@ -1,4 +1,4 @@
-use crate::path::Path;
+use hostios_domain::Path;
 
 #[derive(Debug)]
 pub enum Statement {
@@ -128,7 +128,7 @@ enum StatementParseState {
 #[derive(thiserror::Error, Debug)]
 pub enum StatementParseError {
     #[error("INVALID_PATH:{0}")]
-    InvalidPath(#[from] crate::path::PathParseError),
+    InvalidPath(#[from] hostios_domain::PathParseError),
     #[error("INVALID_TARGET:{0}")]
     InvalidData(String),
     #[error("INVALID_VERB_AND_ENTITY")]

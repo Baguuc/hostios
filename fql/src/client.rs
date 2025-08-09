@@ -57,9 +57,9 @@ impl Client {
                             .trim_start_matches(root_str)
                             .to_string();
 
-                        let path = crate::path::Path::parse(path).unwrap();
+                        let path = hostios_domain::Path::parse(path).unwrap();
                         
-                        entries_parsed.push(crate::entry::Entry::File(path));
+                        entries_parsed.push(hostios_domain::Entry::File(path));
                     }
                     else if path.is_dir() {
                         let root_str = self.root
@@ -74,8 +74,8 @@ impl Client {
                             .trim_start_matches(root_str)
                             .to_string();
 
-                        let path = crate::path::Path::parse(path).unwrap();
-                        entries_parsed.push(crate::entry::Entry::Directory(path));
+                        let path = hostios_domain::Path::parse(path).unwrap();
+                        entries_parsed.push(hostios_domain::Entry::Directory(path));
                     }
                 }
                 
@@ -123,7 +123,7 @@ impl Client {
 #[derive(Debug)]
 pub enum QueryExecuteResult {
     Null,
-    EntryList(Vec<crate::entry::Entry>),
+    EntryList(Vec<hostios_domain::Entry>),
     String(String)
 }
 
@@ -135,7 +135,7 @@ impl QueryExecuteResult {
         };
     }
     
-    pub fn unwrap_entry_list(self) -> Vec<crate::entry::Entry> {
+    pub fn unwrap_entry_list(self) -> Vec<hostios_domain::Entry> {
         return match self {
             Self::EntryList(list) => list,
             _ => panic!("Cannot unwrap EntryList value!")

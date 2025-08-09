@@ -1,6 +1,5 @@
-#[derive(Debug, serde::Serialize, Clone)]
-#[serde(untagged)]
+#[derive(Debug, Clone)]
 pub enum Entry {
-    Directory { full_path: String },
-    File(crate::File)
+    Directory(crate::Path),
+    File(crate::Path)
 }
