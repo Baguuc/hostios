@@ -7,12 +7,15 @@ impl crate::FileTagsUseCase {
     /// Errors:
     /// + when user is not authorized to use this function;
     /// + when the tag with provided name do not exist;
+    /// + when the path do not exist;
+    /// + when the path is invalid;
     /// + when the tag with provided name is not added to this path;
     /// + when the database connection cannot be acquired;
     ///
     pub async fn remove<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
         params: &FileTagRemoveParams, 
         _authios_sdk: authios_sdk::Sdk, 
+        fql_client: fql::Client, 
         client: A
     ) -> Result<(), FileTagRemoveError> {
         pub use authios_sdk::user::authorize::AuthorizeParams;
@@ -35,6 +38,18 @@ impl crate::FileTagsUseCase {
                 
         if crate::TagsRepository::retrieve(&params.tag_name, &mut *client).await.is_err() {
             return Err(Error::TagNotExist);
+        }
+        
+        let path = params.file_path.to_string();
+        
+        let statement = fql::Statement::parse(format!("EXISTS {};", path))
+            .map_err(|_| Error::InvalidPath)?;
+        let exists = fql_client.execute(statement).await
+            .map_err(|_| Error::InvalidPath)?
+            .unwrap_bool();
+        
+        if !exists {
+            return Err(Error::PathNotExist);
         }
 
         let tags = crate::FileTagsRepository::list_tags(&params.file_path, &mut *client)
@@ -69,6 +84,10 @@ pub enum FileTagRemoveError {
     Unauthorized,
     #[error("TAG_NOT_EXIST")]
     TagNotExist,
+    #[error("INVALID_PATH")]
+    InvalidPath,
+    #[error("PATH_NOT_EXIST")]
+    PathNotExist,
     #[error("ALREADY_ADDED")]
     NotAddedYet
 }

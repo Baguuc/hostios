@@ -7,13 +7,15 @@ impl crate::FileTagsUseCase {
     /// Errors:
     /// + when user is not authorized to use this function;
     /// + when the tag with provided name do not exist;
+    /// + when the path do not exist;
+    /// + when the path is invalid;
     /// + when the tag with provided name is already added to this file path;
-    /// + when the file is not a path;
     /// + when the database connection cannot be acquired;
     ///
     pub async fn add<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
         params: &FileTagAddParams, 
         _authios_sdk: authios_sdk::Sdk, 
+        fql_client: &fql::Client, 
         client: A
     ) -> Result<(), FileTagAddError> {
         pub use authios_sdk::user::authorize::AuthorizeParams;
@@ -34,8 +36,16 @@ impl crate::FileTagsUseCase {
             Err(_) | Ok(false) => return Err(Error::Unauthorized)
         };
 
-        if !std::path::PathBuf::from(params.file_path.to_string()).is_file() {
-            return Err(Error::NotAFile);
+        let path = params.file_path.to_string();
+        
+        let statement = fql::Statement::parse(format!("EXISTS {};", path))
+            .map_err(|_| Error::InvalidPath)?;
+        let exists = fql_client.execute(statement).await
+            .map_err(|_| Error::InvalidPath)?
+            .unwrap_bool();
+        
+        if !exists {
+            return Err(Error::PathNotExist);
         }
         
         if crate::TagsRepository::retrieve(&params.tag_name, &mut *client).await.is_err() {
@@ -66,10 +76,12 @@ pub enum FileTagAddError {
     DatabaseConnection,
     #[error("UNAUTHORIZED")]
     Unauthorized,
+    #[error("INVALID_PATH")]
+    InvalidPath,
     #[error("TAG_NOT_EXIST")]
     TagNotExist,
-    #[error("NOT_A_FILE")]
-    NotAFile,
+    #[error("PATH_NOT_EXIST")]
+    PathNotExist,
     #[error("ALREADY_ADDED")]
     AlreadyAdded,
 }
