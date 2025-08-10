@@ -16,7 +16,6 @@ impl crate::FilesUseCase {
         client: A
     ) -> Result<(), FileMoveError> {
         use crate::repositories::files::move_::FileMoveError as RepoMoveError;
-        use crate::repositories::files::read::FileReadError as RepoReadError;
         use authios_sdk::user::authorize::AuthorizeParams;
         
         type Error = FileMoveError;
@@ -35,12 +34,15 @@ impl crate::FilesUseCase {
             Err(_) | Ok(false) => return Err(Error::Unauthorized)
         };
         
-        let _ = crate::FilesRepository::read(&params.file_path, fql_client)
-            .await
-            .map_err(|error| match error {
-                RepoReadError::InvalidPath => Error::InvalidPath,
-                RepoReadError::NotExist => Error::NotExist,
-            })?;
+        let statement = fql::Statement::parse(format!("EXISTS {};", path))
+            .map_err(|_| Error::InvalidPath)?;
+        let exists = fql_client.execute(statement).await
+            .map_err(|_| Error::InvalidPath)?
+            .unwrap_bool();
+        
+        if !exists {
+            return Err(Error::NotExist);
+        }
 
         let _ = crate::FilesRepository::move_(&params.file_path, &params.new_file_path, fql_client, &mut *client)
             .await
