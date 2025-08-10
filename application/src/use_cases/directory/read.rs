@@ -14,6 +14,7 @@ impl crate::DirectoriesUseCase {
         _authios_sdk: authios_sdk::Sdk,
         fql_client: &fql::Client
     ) -> Result<Vec<hostios_domain::Entry>, DirectoryReadError> {
+        use crate::repositories::directories::read::DirectoryReadError as RepoError;
         pub use authios_sdk::user::authorize::AuthorizeParams;
         
         type Error = DirectoryReadError;
@@ -28,14 +29,14 @@ impl crate::DirectoriesUseCase {
             Err(_) | Ok(false) => return Err(Error::Unauthorized)
         };
         
-        let statement = fql::Statement::parse(format!("READ DIR {};", params.path))
-            .map_err(|_| Error::InvalidPath)?;
-
-        let result = fql_client.execute(statement)
+        let result = crate::DirectoriesRepository::read(&params.path, fql_client)
             .await
-            .map_err(|_| Error::NotExist)?;
+            .map_err(|error| match error {
+                RepoError::InvalidPath => Error::InvalidPath,
+                RepoError::NotExist => Error::NotExist
+            })?;
 
-        return Ok(result.unwrap_entry_list());
+        return Ok(result);
     }
 }
 

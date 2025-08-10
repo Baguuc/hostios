@@ -14,6 +14,8 @@ impl crate::DirectoriesUseCase {
         _authios_sdk: authios_sdk::Sdk,
         fql_client: &fql::Client
     ) -> Result<(), DirectoryMoveError> {
+        use crate::repositories::directories::move_::DirectoryMoveError as RepoMoveError;
+        use crate::repositories::directories::read::DirectoryReadError as RepoReadError;
         pub use authios_sdk::user::authorize::AuthorizeParams;
         
         type Error = DirectoryMoveError;
@@ -27,13 +29,20 @@ impl crate::DirectoriesUseCase {
             Ok(true) => (),
             Err(_) | Ok(false) => return Err(Error::Unauthorized)
         };
-
-        let statement = fql::Statement::parse(format!("MOVE DIR {}, {};", params.path, params.new_path))
-            .map_err(|_| Error::InvalidPath)?;
-
-        fql_client.execute(statement)
+        
+        let _ = crate::DirectoriesRepository::read(&params.path, fql_client)
             .await
-            .map_err(|_| Error::CannotMove)?;
+            .map_err(|error| match error {
+                RepoReadError::InvalidPath => Error::InvalidPath,
+                RepoReadError::NotExist => Error::NotExist
+            })?;
+        
+        let _ = crate::DirectoriesRepository::move_(&params.path, &params.new_path, fql_client)
+            .await
+            .map_err(|error| match error {
+                RepoMoveError::InvalidPath => Error::InvalidPath,
+                RepoMoveError::CannotMove => Error::NewParentPathNotExist
+            })?;
 
         return Ok(());
     }
@@ -49,8 +58,10 @@ pub struct DirectoryMoveParams {
 pub enum DirectoryMoveError {
     #[error("UNAUTHORIZED")]
     Unauthorized,
-    #[error("CANNOT_MOVE")]
-    CannotMove,
     #[error("INVALID_PATH")]
     InvalidPath,
+    #[error("NOT_EXIST")]
+    NotExist,
+    #[error("NEW_PARENT_PATH_NOT_EXIST")]
+    NewParentPathNotExist,
 }

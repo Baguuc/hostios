@@ -15,7 +15,8 @@ impl crate::DirectoriesUseCase {
         _authios_sdk: authios_sdk::Sdk,
         fql_client: &fql::Client
     ) -> Result<(), DirectoryCreateError> {
-        pub use authios_sdk::user::authorize::AuthorizeParams;
+        use crate::repositories::directories::create::DirectoryCreateError as RepoError;
+        use authios_sdk::user::authorize::AuthorizeParams;
         
         type Error = DirectoryCreateError;
 
@@ -28,13 +29,13 @@ impl crate::DirectoriesUseCase {
             Ok(true) => (),
             Err(_) | Ok(false) => return Err(Error::Unauthorized)
         };
-
-        let statement = fql::Statement::parse(format!("CREATE DIR {};", params.path))
-            .map_err(|_| Error::InvalidPath)?;
-
-        fql_client.execute(statement)
+        
+        let _ = crate::DirectoriesRepository::create(&params.path, fql_client)
             .await
-            .map_err(|_| Error::AlreadyExist)?;
+            .map_err(|error| match error {
+                RepoError::InvalidPath => Error::InvalidPath,
+                RepoError::AlreadyExist => Error::AlreadyExist,
+            });
 
         return Ok(());
     }
