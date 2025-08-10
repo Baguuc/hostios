@@ -8,7 +8,8 @@ pub enum Statement {
     MoveFile { path: Path, new_path: Path },
     MoveDir { path: Path, new_path: Path },
     DeleteDir(Path),
-    DeleteFile(Path)
+    DeleteFile(Path),
+    Exists(Path)
 }
 
 impl Statement {
@@ -38,7 +39,7 @@ impl Statement {
                     current = String::new();
                 },
                 
-                (StatementParseState::Data, ';') => {
+                (_, ';') => {
                     raw_data = current;
 
                     break;
@@ -111,6 +112,12 @@ impl Statement {
                     .map_err(|error| StatementParseError::InvalidPath(error))?;
 
                 Self::DeleteFile(path)
+            },
+            ("exists", _) => {
+                let path = Path::parse(raw_data)
+                    .map_err(|error| StatementParseError::InvalidPath(error))?;
+                
+                Self::Exists(path)
             },
             (_, _) => return Err(StatementParseError::InvalidVerbAndEntity)
         };

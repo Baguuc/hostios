@@ -115,6 +115,14 @@ impl Client {
                     .map_err(|_| QueryExecuteError::Fs(String::from("file not found")))?;
 
                 return Ok(QueryExecuteResult::Null);
+            },
+            Statement::Exists(path) => {
+                let path: std::path::PathBuf = path.into();
+                let full_path = self.root.join(path);
+
+                let exists = full_path.exists();
+
+                return Ok(QueryExecuteResult::Bool(exists));
             }
         };
     }
@@ -123,6 +131,7 @@ impl Client {
 #[derive(Debug)]
 pub enum QueryExecuteResult {
     Null,
+    Bool(bool),
     EntryList(Vec<hostios_domain::Entry>),
     String(String)
 }
@@ -131,6 +140,13 @@ impl QueryExecuteResult {
     pub fn unwrap_null(self) -> () {
         return match self {
             Self::Null => (),
+            _ => panic!("Cannot unwrap Null value!")
+        };
+    }
+    
+    pub fn unwrap_bool(self) -> bool {
+        return match self {
+            Self::Bool(bool) => bool,
             _ => panic!("Cannot unwrap Null value!")
         };
     }
