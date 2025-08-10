@@ -5,16 +5,19 @@ impl crate::FilesUseCase {
     /// delete a file, checking for errors
     ///
     /// Errors:
-    /// + when user is not authorized to use this function;
-    /// + when the file cannot be deleted;
     /// + when database connection cannot be acquired;
+    /// + when user is not authorized to use this function;
+    /// + when the path is invalid;
+    /// + when the file not exist;
     ///
     pub async fn delete<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
         params: &FileDeleteParams, 
         _authios_sdk: authios_sdk::Sdk,
+        fql_client: &fql::Client,
         client: A
     ) -> Result<(), FileDeleteError> {
-        pub use authios_sdk::user::authorize::AuthorizeParams;
+        use crate::repositories::files::delete::FileDeleteError as RepoError;
+        use authios_sdk::user::authorize::AuthorizeParams;
         
         type Error = FileDeleteError;
 
@@ -24,7 +27,7 @@ impl crate::FilesUseCase {
 
         let authorize_params = AuthorizeParams {
             token: params.user_token.clone(),
-            permission: String::from("hostios:directories:delete")
+            permission: String::from("hostios:files:delete")
         };
 
         match _authios_sdk.authorize(authorize_params).await {
@@ -32,17 +35,20 @@ impl crate::FilesUseCase {
             Err(_) | Ok(false) => return Err(Error::Unauthorized)
         };
 
-        let _ = crate::FilesRepository::delete(&params.file_path, &params.data_dir, &mut *client)
+        let _ = crate::FilesRepository::delete(&params.file_path, fql_client, &mut *client)
             .await
-            .map_err(|_| Error::CannotDelete)?;
+            .map_err(|error| match error {
+                RepoError::InvalidPath => Error::InvalidPath,
+                RepoError::DatabaseConnection => Error::DatabaseConnection,
+                RepoError::CannotDelete => Error::NotExist
+            })?;
 
         return Ok(());
     }
 }
 
 pub struct FileDeleteParams {
-    file_path: crate::utils::Path,
-    data_dir: crate::utils::DataDirPath,
+    file_path: String,
     user_token: String
 }
 
@@ -52,6 +58,8 @@ pub enum FileDeleteError {
     DatabaseConnection,
     #[error("UNAUTHORIZED")]
     Unauthorized,
-    #[error("CANNOT_MOVE")]
-    CannotDelete
+    #[error("INVALID_PATH")]
+    InvalidPath,
+    #[error("NOT_EXIST")]
+    NotExist
 }

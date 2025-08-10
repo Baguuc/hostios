@@ -12,9 +12,12 @@ impl crate::FilesUseCase {
     pub async fn move_<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
         params: &FileMoveParams, 
         _authios_sdk: authios_sdk::Sdk,
+        fql_client: &fql::Client,
         client: A
     ) -> Result<(), FileMoveError> {
-        pub use authios_sdk::user::authorize::AuthorizeParams;
+        use crate::repositories::files::move_::FileMoveError as RepoMoveError;
+        use crate::repositories::files::read::FileReadError as RepoReadError;
+        use authios_sdk::user::authorize::AuthorizeParams;
         
         type Error = FileMoveError;
 
@@ -31,19 +34,29 @@ impl crate::FilesUseCase {
             Ok(true) => (),
             Err(_) | Ok(false) => return Err(Error::Unauthorized)
         };
-
-        let _ = crate::FilesRepository::move_(&params.file_path, &params.new_file_path, &params.data_dir, &mut *client)
+        
+        let _ = crate::FilesRepository::read(&params.file_path, fql_client)
             .await
-            .map_err(|_| Error::CannotMove)?;
+            .map_err(|error| match error {
+                RepoReadError::InvalidPath => Error::InvalidPath,
+                RepoReadError::NotExist => Error::NotExist,
+            })?;
+
+        let _ = crate::FilesRepository::move_(&params.file_path, &params.new_file_path, fql_client, &mut *client)
+            .await
+            .map_err(|error| match error {
+                RepoMoveError::InvalidPath => Error::InvalidPath,
+                RepoMoveError::CannotMove => Error::NewParentNotExist,
+                RepoMoveError::DatabaseConnection => Error::DatabaseConnection
+            })?;
 
         return Ok(());
     }
 }
 
 pub struct FileMoveParams {
-    file_path: crate::utils::Path,
-    new_file_path: crate::utils::Path,
-    data_dir: crate::utils::DataDirPath,
+    file_path: String,
+    new_file_path: String,
     user_token: String
 }
 
@@ -53,6 +66,10 @@ pub enum FileMoveError {
     DatabaseConnection,
     #[error("UNAUTHORIZED")]
     Unauthorized,
-    #[error("CANNOT_MOVE")]
-    CannotMove
+    #[error("INVALID_PATH")]
+    InvalidPath,
+    #[error("NOT_EXIST")]
+    NotExist,
+    #[error("NEW_PARENT_NOT_EXIST")]
+    NewParentNotExist
 }

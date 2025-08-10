@@ -9,9 +9,11 @@ impl crate::FilesUseCase {
     ///
     pub async fn read(
         params: &FileReadParams, 
-        _authios_sdk: authios_sdk::Sdk 
+        _authios_sdk: authios_sdk::Sdk,
+        fql_client: &fql::Client
     ) -> Result<String, FileReadError> {
-        pub use authios_sdk::user::authorize::AuthorizeParams;
+        use crate::repositories::files::read::FileReadError as RepoError;
+        use authios_sdk::user::authorize::AuthorizeParams;
         
         type Error = FileReadError;
 
@@ -25,23 +27,28 @@ impl crate::FilesUseCase {
             Err(_) | Ok(false) => return Err(Error::Unauthorized)
         };
 
-        // won't error as the path checks if the file exists
-        let data = crate::FilesRepository::read(&params.file_path, &params.data_dir)
+        let data = crate::FilesRepository::read(&params.file_path, fql_client)
             .await
-            .unwrap();
+            .map_err(|error| match error {
+                RepoError::InvalidPath => Error::InvalidPath,
+                RepoError::NotExist => Error::NotExist
+            })?;
 
         return Ok(data);
     }
 }
 
 pub struct FileReadParams {
-    file_path: crate::utils::Path,
-    data_dir: crate::utils::DataDirPath,
+    file_path: String,
     user_token: String
 }
 
 #[derive(thiserror::Error, Debug)]
 pub enum FileReadError {
     #[error("UNAUTHORIZED")]
-    Unauthorized
+    Unauthorized,
+    #[error("INVALID_PATH")]
+    InvalidPath,
+    #[error("INVALID_PATH")]
+    NotExist
 }
