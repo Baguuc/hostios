@@ -36,7 +36,7 @@ impl crate::FileTagsUseCase {
             return Err(Error::TagNotExist);
         }
 
-        let data = crate::FileTagsRepository::list(
+        let data = crate::FileTagsRepository::list_paths(
             &params.tag_name,
             &mut *client
         )

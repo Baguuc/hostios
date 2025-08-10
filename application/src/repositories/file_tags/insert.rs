@@ -3,7 +3,7 @@ impl crate::FileTagsRepository {
     ///
     /// insert a tag to file entry's tag list
     ///
-    pub async fn insert<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(path: &crate::utils::Path, tag: &String, client: A) -> Result<(), sqlx::Error> {
+    pub async fn insert<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(path: &hostios_domain::Path, tag: &String, client: A) -> Result<(), sqlx::Error> {
         let mut client = client.acquire()
             .await?;
         

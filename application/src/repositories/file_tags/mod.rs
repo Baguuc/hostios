@@ -1,5 +1,6 @@
 pub mod insert;
-pub mod list;
+pub mod list_paths;
+pub mod list_tags;
 pub mod delete;
 
 /// # FileTagsRepository (struct)

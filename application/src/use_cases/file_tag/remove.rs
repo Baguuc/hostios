@@ -37,13 +37,11 @@ impl crate::FileTagsUseCase {
             return Err(Error::TagNotExist);
         }
 
-        // won't error
-        let tags = crate::FilesRepository::retrieve(&params.file_path, &mut *client)
+        let tags = crate::FileTagsRepository::list_tags(&params.file_path, &mut *client)
             .await
-            .unwrap()
-            .tags();
+            .unwrap();
 
-        if tags.iter().find(|tag| tag.name() == params.tag_name).is_none() {
+        if tags.iter().find(|tag| tag == &&params.tag_name).is_none() {
             return Err(Error::NotAddedYet);
         }
 
@@ -59,7 +57,7 @@ impl crate::FileTagsUseCase {
 
 pub struct FileTagRemoveParams {
     tag_name: String,
-    file_path: crate::utils::Path,
+    file_path: hostios_domain::Path,
     user_token: String
 }
 

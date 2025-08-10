@@ -56,7 +56,7 @@ impl crate::FileTagsUseCase {
 
 pub struct FileTagAddParams {
     tag_name: String,
-    file_path: crate::utils::Path,
+    file_path: hostios_domain::Path,
     user_token: String
 }
 
