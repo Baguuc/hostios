@@ -6,6 +6,7 @@ pub mod use_cases;
 pub mod utils;
 
 use repositories::{
+    FilesRepository,
     DirectoriesRepository,
     TagsRepository,
     FileTagsRepository
