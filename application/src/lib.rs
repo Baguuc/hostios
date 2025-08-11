@@ -1,9 +1,5 @@
-mod error;
-mod prelude;
-
 pub mod repositories;
 pub mod use_cases;
-pub mod utils;
 
 use repositories::{
     FilesRepository,
