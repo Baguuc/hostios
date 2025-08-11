@@ -55,6 +55,7 @@ async fn run(args: Args) {
             .service(crate::routes::files::delete::controller)
             .service(crate::routes::files::add_tag::controller)
             .service(crate::routes::files::remove_tag::controller)
+            .service(crate::routes::tags::create::controller)
     });
 
     let binded_server = match server.bind(("0.0.0.0", config.port.clone())) {
