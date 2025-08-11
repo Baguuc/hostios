@@ -30,7 +30,6 @@ async fn run(args: Args) {
     use futures::executor::block_on;
     use clin::components::{header,success,error};
     use colored::Colorize;
-    use hostios_application::*;
     use crate::config::Config;
     use crate::error::error_if_necessary;
     
@@ -47,17 +46,16 @@ async fn run(args: Args) {
         let _authios_sdk = error_if_necessary(authios_sdk::Sdk::create(config.authios_url.clone()));
 
         App::new()
-            .app_data(Data::new(TagRepository::new(pool.clone())))
-            .app_data(Data::new(DirectoryRepository::new(config.data_dir.clone(), pool.clone())))
-            .app_data(Data::new(EntryRepository::new(config.data_dir.clone(), pool)))
+            .app_data(Data::new(fql::Client::new(std::path::PathBuf::from(&config.data_dir))))
+            .app_data(Data::new(pool))
             .app_data(Data::new(_authios_sdk))
             .app_data(Data::new(config))
-            .service(crate::routes::entry::select::controller)
-            .service(crate::routes::entry::upload::controller)
-            .service(crate::routes::entry::delete::controller)
-            .service(crate::routes::entry::move_entry::controller)
-            .service(crate::routes::entry::insert_tag::controller)
-            .service(crate::routes::entry::delete_tag::controller)
+            .service(crate::routes::files::upload::controller)
+            .service(crate::routes::files::read::controller)
+            .service(crate::routes::files::move_::controller)
+            .service(crate::routes::files::delete::controller)
+            .service(crate::routes::files::add_tag::controller)
+            .service(crate::routes::files::remove_tag::controller)
     });
 
     let binded_server = match server.bind(("0.0.0.0", config.port.clone())) {

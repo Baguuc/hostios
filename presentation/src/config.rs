@@ -5,8 +5,7 @@ pub struct Config {
     pub port: u16,
     pub database: DatabaseConfig,
     pub data_dir: String,
-    pub authios_url: String,
-    pub service_permission: String
+    pub authios_url: String
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
@@ -24,9 +23,7 @@ impl Config {
         use serde_json::from_str;
 
         let content = read_to_string(path)?;
-        let mut parsed = from_str::<Self>(&content)?;
-
-        parsed.data_dir = parsed.data_dir.trim_end_matches('/').to_string();
+        let parsed = from_str::<Self>(&content)?;
 
         return Ok(parsed);
     }

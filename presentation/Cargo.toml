@@ -20,3 +20,4 @@ clap = { version = "4.5.42", features = ["derive"] }
 clin = { git = "https://github.com/Baguuc/clin", version = "0.1.0" }
 colored = "3.0.0"
 actix-multipart = "0.7.2"
+fql = { version = "0.1.0", path = "../fql" }
