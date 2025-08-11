@@ -10,7 +10,7 @@ impl crate::DirectoriesUseCase {
     /// + when the directory not exist;
     /// + when the directory is not empty;
     ///
-    pub async fn delete<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
+    pub async fn delete(
         params: &DirectoryDeleteParams, 
         _authios_sdk: &std::sync::Arc<authios_sdk::Sdk>,
         fql_client: &std::sync::Arc<fql::Client>
