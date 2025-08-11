@@ -1,4 +1,4 @@
-#[derive(Debug, serde::Serialize, Clone)]
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
 pub struct File {
     pub full_path: String,
     pub tags: Vec<crate::Tag>
