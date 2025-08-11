@@ -57,9 +57,9 @@ impl crate::FilesUseCase {
 }
 
 pub struct FileMoveParams {
-    file_path: String,
-    new_file_path: String,
-    user_token: String
+    pub file_path: String,
+    pub new_file_path: String,
+    pub user_token: String
 }
 
 #[derive(thiserror::Error, Debug)]

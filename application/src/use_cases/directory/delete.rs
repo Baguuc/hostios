@@ -50,8 +50,8 @@ impl crate::DirectoriesUseCase {
 }
 
 pub struct DirectoryDeleteParams {
-    path: String,
-    user_token: String
+    pub path: String,
+    pub user_token: String
 }
 
 #[derive(thiserror::Error, Debug)]

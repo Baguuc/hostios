@@ -49,9 +49,9 @@ impl crate::DirectoriesUseCase {
 }
 
 pub struct DirectoryMoveParams {
-    path: String,
-    new_path: String,
-    user_token: String
+    pub path: String,
+    pub new_path: String,
+    pub user_token: String
 }
 
 #[derive(thiserror::Error, Debug)]

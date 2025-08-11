@@ -45,9 +45,9 @@ impl crate::TagsUseCase {
 }
 
 pub struct TagCreateParams {
-    name: String,
-    description: String,
-    user_token: String
+    pub name: String,
+    pub description: String,
+    pub user_token: String
 }
 
 #[derive(thiserror::Error, Debug)]

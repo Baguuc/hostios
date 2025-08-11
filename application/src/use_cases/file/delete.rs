@@ -48,8 +48,8 @@ impl crate::FilesUseCase {
 }
 
 pub struct FileDeleteParams {
-    file_path: String,
-    user_token: String
+    pub file_path: String,
+    pub user_token: String
 }
 
 #[derive(thiserror::Error, Debug)]

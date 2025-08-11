@@ -71,9 +71,9 @@ impl crate::FileTagsUseCase {
 }
 
 pub struct FileTagRemoveParams {
-    tag_name: String,
-    file_path: hostios_domain::Path,
-    user_token: String
+    pub tag_name: String,
+    pub file_path: hostios_domain::Path,
+    pub user_token: String
 }
 
 #[derive(thiserror::Error, Debug)]

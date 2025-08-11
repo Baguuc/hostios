@@ -41,8 +41,8 @@ impl crate::DirectoriesUseCase {
 }
 
 pub struct DirectoryReadParams {
-    path: String,
-    user_token: String
+    pub path: String,
+    pub user_token: String
 }
 
 #[derive(thiserror::Error, Debug)]

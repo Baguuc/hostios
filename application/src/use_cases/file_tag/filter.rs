@@ -49,8 +49,8 @@ impl crate::FileTagsUseCase {
 }
 
 pub struct FileTagFilterParams {
-    tag_name: String,
-    user_token: String
+    pub tag_name: String,
+    pub user_token: String
 }
 
 #[derive(thiserror::Error, Debug)]

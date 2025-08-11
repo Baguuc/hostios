@@ -10,7 +10,7 @@ impl crate::TagsUseCase {
     /// + when the database connection cannot be acquired;
     ///
     pub async fn delete<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
-        params: &TagCreateParams, 
+        params: &TagDeleteParams, 
         _authios_sdk: &std::sync::Arc<authios_sdk::Sdk>, 
         client: A
     ) -> Result<(), TagCreateError> {
@@ -45,10 +45,9 @@ impl crate::TagsUseCase {
     }
 }
 
-pub struct TagCreateParams {
-    name: String,
-    description: String,
-    user_token: String
+pub struct TagDeleteParams {
+    pub name: String,
+    pub user_token: String
 }
 
 #[derive(thiserror::Error, Debug)]
