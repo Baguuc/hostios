@@ -55,6 +55,7 @@ async fn run(args: Args) {
             .service(crate::routes::files::delete::controller)
             .service(crate::routes::files::add_tag::controller)
             .service(crate::routes::files::remove_tag::controller)
+            .service(crate::routes::files::search_by_tag::controller)
             .service(crate::routes::tags::create::controller)
             .service(crate::routes::tags::delete::controller)
             .service(crate::routes::directories::create::controller)
