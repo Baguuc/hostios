@@ -1,5 +1,3 @@
-use crate::prelude::*;
-
 #[derive(clap::Parser)]
 #[command(name = "hostios")]
 #[command(bin_name = "hostios")]
@@ -31,7 +29,8 @@ async fn run(args: Args) {
     use clin::components::{header,success,error};
     use colored::Colorize;
     use crate::config::Config;
-    use crate::error::error_if_necessary;
+    use crate::utils::error::error_if_necessary;
+    use crate::utils::sqlx::create_pool;
     
     header("Running web server");
 
@@ -68,20 +67,4 @@ async fn run(args: Args) {
     };
 
     let _ = binded_server.run().await;
-}
-
-async fn create_pool(config: crate::config::DatabaseConfig) -> Result<sqlx::postgres::PgPool> {
-    use sqlx::postgres::PgPool;
-
-    let connection_string = format!(
-        "postgres://{}:{}@{}:{}/{}",
-        config.user,
-        config.password,
-        config.host,
-        config.port,
-        config.database
-    );
-    let pool = PgPool::connect(connection_string.as_str()).await?;
-
-    return Ok(pool);
 }
