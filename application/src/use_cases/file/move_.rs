@@ -34,7 +34,7 @@ impl crate::FilesUseCase {
             Err(_) | Ok(false) => return Err(Error::Unauthorized)
         };
         
-        let statement = fql::Statement::parse(format!("EXISTS {};", path))
+        let statement = fql::Statement::parse(format!("EXISTS {};", params.file_path))
             .map_err(|_| Error::InvalidPath)?;
         let exists = fql_client.execute(statement).await
             .map_err(|_| Error::InvalidPath)?
