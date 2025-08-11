@@ -11,8 +11,8 @@ impl crate::DirectoriesUseCase {
     ///
     pub async fn read(
         params: &DirectoryReadParams, 
-        _authios_sdk: authios_sdk::Sdk,
-        fql_client: &fql::Client
+        _authios_sdk: &std::sync::Arc<authios_sdk::Sdk>,
+        fql_client: &std::sync::Arc<fql::Client>
     ) -> Result<Vec<hostios_domain::Entry>, DirectoryReadError> {
         use crate::repositories::directories::read::DirectoryReadError as RepoError;
         pub use authios_sdk::user::authorize::AuthorizeParams;

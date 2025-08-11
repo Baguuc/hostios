@@ -12,8 +12,8 @@ impl crate::DirectoriesUseCase {
     ///
     pub async fn create(
         params: &DirectoryCreateParams, 
-        _authios_sdk: authios_sdk::Sdk,
-        fql_client: &fql::Client
+        _authios_sdk: &std::sync::Arc<authios_sdk::Sdk>,
+        fql_client: &std::sync::Arc<fql::Client>
     ) -> Result<(), DirectoryCreateError> {
         use crate::repositories::directories::create::DirectoryCreateError as RepoError;
         use authios_sdk::user::authorize::AuthorizeParams;

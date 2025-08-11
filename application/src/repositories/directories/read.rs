@@ -5,7 +5,7 @@ impl crate::DirectoriesRepository {
     ///
     pub async fn read(
         path: &String, 
-        fql_client: &fql::Client
+        fql_client: &std::sync::Arc<fql::Client>
     ) -> Result<Vec<hostios_domain::Entry>, DirectoryReadError> {
         type Error = DirectoryReadError; 
 

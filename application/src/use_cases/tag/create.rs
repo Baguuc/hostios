@@ -11,7 +11,7 @@ impl crate::TagsUseCase {
     ///
     pub async fn create<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
         params: &TagCreateParams, 
-        _authios_sdk: authios_sdk::Sdk, 
+        _authios_sdk: &std::sync::Arc<authios_sdk::Sdk>, 
         client: A
     ) -> Result<(), TagCreateError> {
         pub use authios_sdk::user::authorize::AuthorizeParams;

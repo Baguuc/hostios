@@ -9,8 +9,8 @@ impl crate::FilesUseCase {
     ///
     pub async fn read(
         params: &FileReadParams, 
-        _authios_sdk: authios_sdk::Sdk,
-        fql_client: &fql::Client
+        _authios_sdk: &std::sync::Arc<authios_sdk::Sdk>,
+        fql_client: &std::sync::Arc<fql::Client>
     ) -> Result<String, FileReadError> {
         use crate::repositories::files::read::FileReadError as RepoError;
         use authios_sdk::user::authorize::AuthorizeParams;

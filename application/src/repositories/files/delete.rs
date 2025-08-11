@@ -5,7 +5,7 @@ impl crate::FilesRepository {
     ///
     pub async fn delete<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
         path: &String, 
-        fql_client: &fql::Client,
+        fql_client: &std::sync::Arc<fql::Client>,
         client: A
     ) -> Result<(), FileDeleteError> {
         type Error = FileDeleteError;

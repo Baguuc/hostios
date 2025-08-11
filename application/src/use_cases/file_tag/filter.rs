@@ -11,7 +11,7 @@ impl crate::FileTagsUseCase {
     ///
     pub async fn filter<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
         params: &FileTagFilterParams, 
-        _authios_sdk: authios_sdk::Sdk, 
+        _authios_sdk: &std::sync::Arc<authios_sdk::Sdk>, 
         client: A
     ) -> Result<Vec<String>, FileTagFilterError> {
         pub use authios_sdk::user::authorize::AuthorizeParams;

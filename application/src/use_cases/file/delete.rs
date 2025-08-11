@@ -12,8 +12,8 @@ impl crate::FilesUseCase {
     ///
     pub async fn delete<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
         params: &FileDeleteParams, 
-        _authios_sdk: authios_sdk::Sdk,
-        fql_client: &fql::Client,
+        _authios_sdk: &std::sync::Arc<authios_sdk::Sdk>,
+        fql_client: &std::sync::Arc<fql::Client>,
         client: A
     ) -> Result<(), FileDeleteError> {
         use crate::repositories::files::delete::FileDeleteError as RepoError;

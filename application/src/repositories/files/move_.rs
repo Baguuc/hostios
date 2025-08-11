@@ -6,7 +6,7 @@ impl crate::FilesRepository {
     pub async fn move_<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
         path: &String, 
         new_path: &String, 
-        fql_client: &fql::Client,
+        fql_client: &std::sync::Arc<fql::Client>,
         client: A
     ) -> Result<(), FileMoveError> {
         type Error = FileMoveError; 

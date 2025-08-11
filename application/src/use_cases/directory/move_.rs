@@ -11,8 +11,8 @@ impl crate::DirectoriesUseCase {
     ///
     pub async fn move_(
         params: &DirectoryMoveParams, 
-        _authios_sdk: authios_sdk::Sdk,
-        fql_client: &fql::Client
+        _authios_sdk: &std::sync::Arc<authios_sdk::Sdk>,
+        fql_client: &std::sync::Arc<fql::Client>
     ) -> Result<(), DirectoryMoveError> {
         use crate::repositories::directories::move_::DirectoryMoveError as RepoMoveError;
         use crate::repositories::directories::read::DirectoryReadError as RepoReadError;

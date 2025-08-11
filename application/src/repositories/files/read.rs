@@ -5,7 +5,7 @@ impl crate::FilesRepository {
     ///
     pub async fn read(
         path: &String, 
-        fql_client: &fql::Client
+        fql_client: &std::sync::Arc<fql::Client>
     ) -> Result<String, FileReadError> {
         type Error = FileReadError; 
 

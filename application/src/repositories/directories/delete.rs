@@ -5,7 +5,7 @@ impl crate::DirectoriesRepository {
     ///
     pub async fn delete(
         path: &String, 
-        fql_client: &fql::Client
+        fql_client: &std::sync::Arc<fql::Client>
     ) -> Result<(), DirectoryDeleteError> {
         type Error = DirectoryDeleteError; 
         

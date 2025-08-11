@@ -12,8 +12,8 @@ impl crate::DirectoriesUseCase {
     ///
     pub async fn delete<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
         params: &DirectoryDeleteParams, 
-        _authios_sdk: authios_sdk::Sdk,
-        fql_client: &fql::Client
+        _authios_sdk: &std::sync::Arc<authios_sdk::Sdk>,
+        fql_client: &std::sync::Arc<fql::Client>
     ) -> Result<(), DirectoryDeleteError> {
         use crate::repositories::directories::delete::DirectoryDeleteError as RepoDeleteError;
         use crate::repositories::directories::read::DirectoryReadError as RepoReadError;

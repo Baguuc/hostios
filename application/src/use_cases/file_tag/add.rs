@@ -14,8 +14,8 @@ impl crate::FileTagsUseCase {
     ///
     pub async fn add<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
         params: &FileTagAddParams, 
-        _authios_sdk: authios_sdk::Sdk, 
-        fql_client: &fql::Client, 
+        _authios_sdk: &std::sync::Arc<authios_sdk::Sdk>, 
+        fql_client: &std::sync::Arc<fql::Client>, 
         client: A
     ) -> Result<(), FileTagAddError> {
         pub use authios_sdk::user::authorize::AuthorizeParams;

@@ -5,7 +5,7 @@ impl crate::DirectoriesRepository {
     ///
     pub async fn create(
         path: &String, 
-        fql_client: &fql::Client
+        fql_client: &std::sync::Arc<fql::Client>
     ) -> Result<(), DirectoryCreateError> {
         type Error = DirectoryCreateError; 
         

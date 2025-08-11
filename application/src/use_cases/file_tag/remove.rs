@@ -14,7 +14,7 @@ impl crate::FileTagsUseCase {
     ///
     pub async fn remove<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
         params: &FileTagRemoveParams, 
-        _authios_sdk: authios_sdk::Sdk, 
+        _authios_sdk: &std::sync::Arc<authios_sdk::Sdk>, 
         fql_client: fql::Client, 
         client: A
     ) -> Result<(), FileTagRemoveError> {

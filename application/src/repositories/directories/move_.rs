@@ -6,7 +6,7 @@ impl crate::DirectoriesRepository {
     pub async fn move_(
         path: &String, 
         new_path: &String, 
-        fql_client: &fql::Client
+        fql_client: &std::sync::Arc<fql::Client>
     ) -> Result<(), DirectoryMoveError> {
         type Error = DirectoryMoveError; 
 
