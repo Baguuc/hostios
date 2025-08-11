@@ -13,10 +13,10 @@ impl crate::TagsUseCase {
         params: &TagDeleteParams, 
         _authios_sdk: &std::sync::Arc<authios_sdk::Sdk>, 
         client: A
-    ) -> Result<(), TagCreateError> {
+    ) -> Result<(), TagDeleteError> {
         pub use authios_sdk::user::authorize::AuthorizeParams;
         
-        type Error = TagCreateError;
+        type Error = TagDeleteError;
 
         let mut client = client.acquire()
             .await
@@ -51,7 +51,7 @@ pub struct TagDeleteParams {
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum TagCreateError {
+pub enum TagDeleteError {
     #[error("DATABASE_CONNECTION")]
     DatabaseConnection,
     #[error("UNAUTHORIZED")]
