@@ -1,7 +1,7 @@
 impl crate::DirectoriesUseCase {
     /// # DirectoriesUseCase::create
     ///
-    /// check if user has permission to use this function ("hostios:tags:create"), then try to
+    /// check if user has permission to use this function ("hostios:directories:create"), then try to
     /// create a directory checking for errors
     ///
     /// Errors:
@@ -22,7 +22,7 @@ impl crate::DirectoriesUseCase {
 
         let authorize_params = AuthorizeParams {
             token: params.user_token.clone(),
-            permission: String::from("hostios:tags:create")
+            permission: String::from("hostios:directories:create")
         };
 
         match _authios_sdk.authorize(authorize_params).await {

@@ -1,7 +1,7 @@
 impl crate::DirectoriesUseCase {
     /// # DirectoriesUseCase::move_
     ///
-    /// check if user has permission to use this function ("hostios:files:move), then try to
+    /// check if user has permission to use this function ("hostios:directories:move), then try to
     /// move a directory, checking for errors
     ///
     /// Errors:

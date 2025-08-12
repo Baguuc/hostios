@@ -1,7 +1,7 @@
 impl crate::FileTagsUseCase {
     /// # FileTagsUseCase::remove
     ///
-    /// check if user has permission to use this function ("hostios:tags:add"), then try to
+    /// check if user has permission to use this function ("hostios:tags:remove"), then try to
     /// remove a tag from file path checking for errors
     ///
     /// Errors:
@@ -28,7 +28,7 @@ impl crate::FileTagsUseCase {
 
         let authorize_params = AuthorizeParams {
             token: params.user_token.clone(),
-            permission: String::from("hostios:tags:add")
+            permission: String::from("hostios:tags:remove")
         };
 
         match _authios_sdk.authorize(authorize_params).await {

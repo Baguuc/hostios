@@ -1,7 +1,7 @@
 impl crate::DirectoriesUseCase {
     /// # DirectoriesUseCase::delete
     ///
-    /// check if user has permission to use this function ("hostios:files:delete"), then try to
+    /// check if user has permission to use this function ("hostios:directories:delete"), then try to
     /// delete a file, checking for errors
     ///
     /// Errors:
@@ -23,7 +23,7 @@ impl crate::DirectoriesUseCase {
 
         let authorize_params = AuthorizeParams {
             token: params.user_token.clone(),
-            permission: String::from("hostios:files:delete")
+            permission: String::from("hostios:directories:delete")
         };
 
         match _authios_sdk.authorize(authorize_params).await {
