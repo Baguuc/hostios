@@ -16,11 +16,11 @@ pub use use_cases::{
 };
 
 const MIGRATIONS: [&str; 2] = [
-"CREATE TABLE tags (
+"CREATE TABLE IF NOT EXISTS tags (
   name TEXT NOT NULL PRIMARY KEY,
   description TEXT NOT NULL DEFAULT ''
 );",
-"CREATE TABLE file_tags (
+"CREATE TABLE IF NOT EXISTS file_tags (
   file_path TEXT,
   tag_name TEXT NOT NULL,
   FOREIGN KEY (tag_name) REFERENCES tags(name) ON DELETE CASCADE,
