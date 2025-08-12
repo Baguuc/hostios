@@ -5,6 +5,8 @@
 pub enum MainCli {
     #[command(about = "Run the HTTP server", long_about = None)]
     Run(Args),
+    #[command(about = "Run migrations on the database")]
+    Migrate(Args)
 }
 
 #[derive(clap::Args, Clone)]
@@ -19,6 +21,7 @@ impl MainCli {
 
         match self {
             Self::Run(args) => { block_on(run(args)); },
+            Self::Migrate(args) => { block_on(migrate(args)); }
         };
     }
 }
@@ -31,6 +34,9 @@ async fn run(args: Args) {
     use crate::config::Config;
     use crate::utils::error::error_if_necessary;
     use crate::utils::sqlx::create_pool;
+    
+    migrate(args.clone()).await;
+    println!("");
     
     header("Running web server");
 
@@ -73,4 +79,18 @@ async fn run(args: Args) {
     };
 
     let _ = binded_server.run().await;
+}
+
+async fn migrate(args: Args) {
+    use clin::components::{header,success};
+    use crate::config::Config;
+    use crate::utils::error::error_if_necessary;
+    
+    let config = error_if_necessary(Config::read(args.config.unwrap_or(String::from("./hostios.json"))));
+    let pool = error_if_necessary(crate::utils::sqlx::create_pool(config.database.clone()).await);
+     
+    header("Migrating database");
+    
+    error_if_necessary(hostios_application::utils::migrations::migrate(&pool).await);
+    success("Migrated");
 }
