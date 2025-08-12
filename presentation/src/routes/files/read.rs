@@ -30,7 +30,7 @@ pub async fn controller(
     };
     
     match FilesUseCase::read(&params, &_authios_sdk.into_inner(), &fql_client.into_inner()).await {
-        Ok(_) => return HttpResponse::Ok().into(),
+        Ok(content) => return HttpResponse::Ok().body(content),
         Err(error) => return match error {
             Error::NotExist => HttpResponse::NotFound().body(error.to_string()),
             Error::InvalidPath => HttpResponse::BadRequest().body(error.to_string()),
