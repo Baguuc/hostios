@@ -1,6 +1,6 @@
 pub mod routes;
 
-pub async fn run_server(config: crate::config::Config) -> Result<(), crate::errors::web::RunApiError> {
+pub async fn run_api(config: crate::config::Config) -> Result<(), crate::errors::web::RunApiError> {
     use actix_web::{HttpServer,App,web::Data};
     use crate::utils::database::create_pool;
     

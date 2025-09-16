@@ -11,8 +11,5 @@ pub mod web;
 
 #[tokio::main]
 async fn main() {
-    use clap::Parser;
-
-    let cli = crate::cli::MainCli::parse();
-    cli.execute();
+    crate::cli::MainCli::run().await;
 }
