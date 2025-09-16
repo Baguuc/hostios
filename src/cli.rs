@@ -27,13 +27,10 @@ impl MainCli {
 }
 
 async fn run(args: Args) {
-    use actix_web::{HttpServer, App, web::Data};
-    use futures::executor::block_on;
-    use clin::components::{header,success,error};
+    use clin::components::{header,success};
     use colored::Colorize;
     use crate::config::Config;
     use crate::utils::error::error_if_necessary;
-    use crate::utils::sqlx::create_pool;
     
     migrate(args.clone()).await;
     println!("");
@@ -44,41 +41,7 @@ async fn run(args: Args) {
     
     success(format!("Server starting on port {}", config.port.to_string().underline()));
     
-    let server = HttpServer::new(move || {
-        let config = error_if_necessary(Config::read(args.clone().config.unwrap_or(String::from("./hostios.json"))));
-        let pool = error_if_necessary(block_on(create_pool(config.database.clone())));
-        
-        let _authios_sdk = error_if_necessary(authios_sdk::AuthiosSdk::new(config.authios_url.clone()));
-
-        App::new()
-            .app_data(Data::new(crate::fql::Client::new(std::path::PathBuf::from(&config.data_dir))))
-            .app_data(Data::new(pool))
-            .app_data(Data::new(_authios_sdk))
-            .app_data(Data::new(config))
-            .service(crate::routes::files::upload::controller)
-            .service(crate::routes::files::read::controller)
-            .service(crate::routes::files::move_::controller)
-            .service(crate::routes::files::delete::controller)
-            .service(crate::routes::files::add_tag::controller)
-            .service(crate::routes::files::remove_tag::controller)
-            .service(crate::routes::files::search_by_tag::controller)
-            .service(crate::routes::tags::create::controller)
-            .service(crate::routes::tags::delete::controller)
-            .service(crate::routes::directories::create::controller)
-            .service(crate::routes::directories::read::controller)
-            .service(crate::routes::directories::move_::controller)
-    });
-
-    let binded_server = match server.bind(("0.0.0.0", config.port.clone())) {
-        Ok(server) => server,
-        Err(_) => {
-            error("Cannot bind to port", config.port);
-            
-            std::process::exit(1);
-        }
-    };
-
-    let _ = binded_server.run().await;
+    error_if_necessary(crate::web::run_server(config).await);
 }
 
 async fn migrate(args: Args) {
@@ -87,7 +50,7 @@ async fn migrate(args: Args) {
     use crate::utils::error::error_if_necessary;
     
     let config = error_if_necessary(Config::read(args.config.unwrap_or(String::from("./hostios.json"))));
-    let pool = error_if_necessary(crate::utils::sqlx::create_pool(config.database.clone()).await);
+    let pool = error_if_necessary(crate::utils::database::create_pool(config.database.clone()).await);
      
     header("Migrating database");
     

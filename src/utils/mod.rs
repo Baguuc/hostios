@@ -1,4 +1,4 @@
 pub mod authios;
-pub mod sqlx;
+pub mod database;
 pub mod error;
 pub mod migrations;

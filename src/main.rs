@@ -7,7 +7,7 @@ pub mod utils;
 pub mod fql;
 pub mod cli;
 pub mod config;
-pub mod routes;
+pub mod web;
 
 #[tokio::main]
 async fn main() {

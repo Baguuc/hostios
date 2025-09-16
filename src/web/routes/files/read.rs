@@ -1,15 +1,14 @@
-#[actix_web::delete("/files/{path}")]
+#[actix_web::get("/{path}")]
 pub async fn controller(
     req: actix_web::HttpRequest,
     path: actix_web::web::Path<PathData>,
     _authios_sdk: actix_web::web::Data<authios_sdk::AuthiosSdk>,
-    fql_client: actix_web::web::Data<crate::fql::Client>,
-    database_client: actix_web::web::Data<sqlx::PgPool>
+    fql_client: actix_web::web::Data<crate::fql::Client>
 ) -> actix_web::HttpResponse {
     use actix_web::HttpResponse;
     use crate::use_cases::file::FilesUseCase;
-    use crate::params::use_case::FileDeleteParams as Params;
-    use crate::errors::use_case::FileDeleteError as Error;
+    use crate::params::use_case::file::FileReadParams as Params;
+    use crate::errors::use_case::FileReadError as Error;
      
     let user_token = match req.headers().get("Authorization") {
         Some(token) => match token.to_str() {
@@ -25,19 +24,13 @@ pub async fn controller(
         file_path,
         user_token,
     };
-
-    let mut database_client = match database_client.acquire().await {
-        Ok(client) => client,
-        Err(_) => return HttpResponse::InternalServerError().body("DATABASE_CONNECTION")
-    };
     
-    match FilesUseCase::delete(&params, &_authios_sdk.into_inner(), &fql_client.into_inner(), &mut *database_client).await {
-        Ok(_) => return HttpResponse::Ok().into(),
+    match FilesUseCase::read(&params, &_authios_sdk.into_inner(), &fql_client.into_inner()).await {
+        Ok(content) => return HttpResponse::Ok().body(content),
         Err(error) => return match error {
             Error::NotExist => HttpResponse::NotFound().body(error.to_string()),
             Error::InvalidPath => HttpResponse::BadRequest().body(error.to_string()),
-            Error::Unauthorized => HttpResponse::Unauthorized().body(error.to_string()),
-            Error::DatabaseConnection => HttpResponse::InternalServerError().body(error.to_string()),
+            Error::Unauthorized => HttpResponse::Unauthorized().body(error.to_string())
         }
     };
 }

@@ -1,4 +1,4 @@
-#[actix_web::post("/directories/{path}")]
+#[actix_web::post("/{path}")]
 pub async fn controller(
     req: actix_web::HttpRequest,
     path: actix_web::web::Path<PathData>,

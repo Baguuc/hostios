@@ -1,14 +1,14 @@
-#[actix_web::post("/tags")]
+#[actix_web::delete("/{name}")]
 pub async fn controller(
     req: actix_web::HttpRequest,
-    json: actix_web::web::Json<JsonData>,
+    path: actix_web::web::Path<PathData>,
     _authios_sdk: actix_web::web::Data<authios_sdk::AuthiosSdk>,
     database_client: actix_web::web::Data<sqlx::PgPool>
 ) -> actix_web::HttpResponse {
     use actix_web::HttpResponse;
     use crate::use_cases::tag::TagsUseCase;
-    use crate::params::use_case::TagCreateParams as Params;
-    use crate::errors::use_case::TagCreateError as Error;
+    use crate::params::use_case::TagDeleteParams as Params;
+    use crate::errors::use_case::TagDeleteError as Error;
      
     let user_token = match req.headers().get("Authorization") {
         Some(token) => match token.to_str() {
@@ -19,8 +19,7 @@ pub async fn controller(
     };
     
     let params = Params {
-        name: json.name().clone(),
-        description: json.description().clone(),
+        name: path.name.clone(),
         user_token
     };
 
@@ -29,14 +28,15 @@ pub async fn controller(
         Err(_) => return HttpResponse::InternalServerError().body("DATABASE_CONNECTION")
     };
     
-    match TagsUseCase::create(&params, &_authios_sdk.into_inner(), &mut *database_client).await {
+    match TagsUseCase::delete(&params, &_authios_sdk.into_inner(), &mut *database_client).await {
         Ok(_) => return HttpResponse::Ok().into(),
         Err(error) => return match error {
             Error::Unauthorized => HttpResponse::Unauthorized().body(error.to_string()),
             Error::DatabaseConnection => HttpResponse::InternalServerError().body(error.to_string()),
-            Error::AlreadyExist => HttpResponse::Conflict().body(error.to_string())
+            Error::NotExist => HttpResponse::Conflict().body(error.to_string())
         }
     };
 }
 
-type JsonData = crate::models::Tag;
+#[derive(serde::Deserialize)]
+struct PathData { name: String }

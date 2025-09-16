@@ -1,14 +1,15 @@
-#[actix_web::delete("/tags/{name}")]
+#[actix_web::delete("/{path}/tags/{tag_name}")]
 pub async fn controller(
     req: actix_web::HttpRequest,
     path: actix_web::web::Path<PathData>,
     _authios_sdk: actix_web::web::Data<authios_sdk::AuthiosSdk>,
+    fql_client: actix_web::web::Data<crate::fql::Client>,
     database_client: actix_web::web::Data<sqlx::PgPool>
 ) -> actix_web::HttpResponse {
     use actix_web::HttpResponse;
-    use crate::use_cases::tag::TagsUseCase;
-    use crate::params::use_case::TagDeleteParams as Params;
-    use crate::errors::use_case::TagDeleteError as Error;
+    use crate::use_cases::file_tag::FileTagsUseCase;
+    use crate::params::use_case::FileTagRemoveParams as Params;
+    use crate::errors::use_case::FileTagRemoveError as Error;
      
     let user_token = match req.headers().get("Authorization") {
         Some(token) => match token.to_str() {
@@ -18,9 +19,15 @@ pub async fn controller(
         None => return HttpResponse::Unauthorized().body("INVALID_TOKEN")
     };
     
+    let file_path = match crate::models::Path::parse(path.path.to_string()) {
+        Ok(file_path) => file_path,
+        Err(_) => return HttpResponse::BadRequest().body("INVALID_PATH")
+    }; 
+    let tag_name = path.tag_name.to_string();
     let params = Params {
-        name: path.name.clone(),
-        user_token
+        file_path,
+        tag_name,
+        user_token,
     };
 
     let mut database_client = match database_client.acquire().await {
@@ -28,15 +35,21 @@ pub async fn controller(
         Err(_) => return HttpResponse::InternalServerError().body("DATABASE_CONNECTION")
     };
     
-    match TagsUseCase::delete(&params, &_authios_sdk.into_inner(), &mut *database_client).await {
+    match FileTagsUseCase::remove(&params, &_authios_sdk.into_inner(), &fql_client.into_inner(), &mut *database_client).await {
         Ok(_) => return HttpResponse::Ok().into(),
         Err(error) => return match error {
+            Error::InvalidPath => HttpResponse::BadRequest().body(error.to_string()),
             Error::Unauthorized => HttpResponse::Unauthorized().body(error.to_string()),
             Error::DatabaseConnection => HttpResponse::InternalServerError().body(error.to_string()),
-            Error::NotExist => HttpResponse::Conflict().body(error.to_string())
+            Error::TagNotExist => HttpResponse::NotFound().body(error.to_string()),
+            Error::NotAddedYet => HttpResponse::Conflict().body(error.to_string()),
+            Error::PathNotExist => HttpResponse::NotFound().body(error.to_string()),
         }
     };
 }
 
 #[derive(serde::Deserialize)]
-struct PathData { name: String }
+pub struct PathData {
+   path: String,
+   tag_name: String
+}

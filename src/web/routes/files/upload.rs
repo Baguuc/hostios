@@ -1,4 +1,4 @@
-#[actix_web::post("/files/{name}")]
+#[actix_web::post("/{name}")]
 pub async fn controller(
     actix_multipart::form::MultipartForm(form): actix_multipart::form::MultipartForm<UploadForm>,
     path: actix_web::web::Path<PathData>,
