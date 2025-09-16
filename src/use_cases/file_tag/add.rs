@@ -17,10 +17,10 @@ impl crate::use_cases::FileTagsUseCase {
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>, 
         fql_client: &std::sync::Arc<crate::fql::Client>, 
         client: A
-    ) -> Result<(), FileTagAddError> {
+    ) -> Result<(), crate::errors::use_case::FileTagAddError> {
         pub use authios_sdk::params::UserSdkAuthorizeParams;
         
-        type Error = FileTagAddError;
+        type Error = crate::errors::use_case::FileTagAddError;
 
         let mut client = client.acquire()
             .await
@@ -63,20 +63,4 @@ impl crate::use_cases::FileTagsUseCase {
 
         return Ok(());
     }
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum FileTagAddError {
-    #[error("DATABASE_CONNECTION")]
-    DatabaseConnection,
-    #[error("UNAUTHORIZED")]
-    Unauthorized,
-    #[error("INVALID_PATH")]
-    InvalidPath,
-    #[error("TAG_NOT_EXIST")]
-    TagNotExist,
-    #[error("PATH_NOT_EXIST")]
-    PathNotExist,
-    #[error("ALREADY_ADDED")]
-    AlreadyAdded,
 }

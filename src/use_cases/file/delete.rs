@@ -15,11 +15,11 @@ impl crate::use_cases::FilesUseCase {
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>,
         fql_client: &std::sync::Arc<crate::fql::Client>,
         client: A
-    ) -> Result<(), FileDeleteError> {
+    ) -> Result<(), crate::errors::use_case::FileDeleteError> {
         use crate::repositories::files::delete::FileDeleteError as RepoError;
         use authios_sdk::params::UserSdkAuthorizeParams;
         
-        type Error = FileDeleteError;
+        type Error = crate::errors::use_case::FileDeleteError;
 
         let mut client = client.acquire()
             .await
@@ -46,16 +46,4 @@ impl crate::use_cases::FilesUseCase {
 
         return Ok(());
     }
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum FileDeleteError {
-    #[error("DatabaseConnection")]
-    DatabaseConnection,
-    #[error("UNAUTHORIZED")]
-    Unauthorized,
-    #[error("INVALID_PATH")]
-    InvalidPath,
-    #[error("NOT_EXIST")]
-    NotExist
 }

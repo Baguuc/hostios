@@ -13,12 +13,12 @@ impl crate::use_cases::DirectoriesUseCase {
         params: &crate::params::use_case::DirectoryMoveParams, 
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>,
         fql_client: &std::sync::Arc<crate::fql::Client>
-    ) -> Result<(), DirectoryMoveError> {
+    ) -> Result<(), crate::errors::use_case::DirectoryMoveError> {
         use crate::repositories::directories::move_::DirectoryMoveError as RepoMoveError;
         use crate::repositories::directories::read::DirectoryReadError as RepoReadError;
         pub use authios_sdk::params::UserSdkAuthorizeParams;
         
-        type Error = DirectoryMoveError;
+        type Error = crate::errors::use_case::DirectoryMoveError;
 
         let authorize_params = UserSdkAuthorizeParams {
             token: params.user_token.clone(),
@@ -47,16 +47,4 @@ impl crate::use_cases::DirectoriesUseCase {
 
         return Ok(());
     }
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum DirectoryMoveError {
-    #[error("UNAUTHORIZED")]
-    Unauthorized,
-    #[error("INVALID_PATH")]
-    InvalidPath,
-    #[error("NOT_EXIST")]
-    NotExist,
-    #[error("NEW_PARENT_PATH_NOT_EXIST")]
-    NewParentPathNotExist,
 }

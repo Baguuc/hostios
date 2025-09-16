@@ -13,10 +13,10 @@ impl crate::use_cases::FileTagsUseCase {
         params: &crate::params::use_case::FileTagFilterParams, 
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>, 
         client: A
-    ) -> Result<Vec<String>, FileTagFilterError> {
+    ) -> Result<Vec<String>, crate::errors::use_case::FileTagFilterError> {
         pub use authios_sdk::params::UserSdkAuthorizeParams;
         
-        type Error = FileTagFilterError;
+        type Error = crate::errors::use_case::FileTagFilterError;
 
         let mut client = client.acquire()
             .await
@@ -47,14 +47,4 @@ impl crate::use_cases::FileTagsUseCase {
 
         return Ok(data);
     }
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum FileTagFilterError {
-    #[error("DATABASE_CONNECTION")]
-    DatabaseConnection,
-    #[error("UNAUTHORIZED")]
-    Unauthorized,
-    #[error("TAG_NOT_EXIST")]
-    TagNotExist,
 }

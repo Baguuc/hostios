@@ -17,10 +17,10 @@ impl crate::use_cases::FileTagsUseCase {
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>, 
         fql_client: &std::sync::Arc<crate::fql::Client>, 
         client: A
-    ) -> Result<(), FileTagRemoveError> {
+    ) -> Result<(), crate::errors::use_case::FileTagRemoveError> {
         pub use authios_sdk::params::UserSdkAuthorizeParams;
         
-        type Error = FileTagRemoveError;
+        type Error = crate::errors::use_case::FileTagRemoveError;
 
         let mut client = client.acquire()
             .await
@@ -69,20 +69,4 @@ impl crate::use_cases::FileTagsUseCase {
 
         return Ok(());
     }
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum FileTagRemoveError {
-    #[error("DATABASE_CONNECTION")]
-    DatabaseConnection,
-    #[error("UNAUTHORIZED")]
-    Unauthorized,
-    #[error("TAG_NOT_EXIST")]
-    TagNotExist,
-    #[error("INVALID_PATH")]
-    InvalidPath,
-    #[error("PATH_NOT_EXIST")]
-    PathNotExist,
-    #[error("ALREADY_ADDED")]
-    NotAddedYet
 }

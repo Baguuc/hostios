@@ -13,10 +13,10 @@ impl crate::use_cases::TagsUseCase {
         params: &crate::params::use_case::TagDeleteParams, 
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>, 
         client: A
-    ) -> Result<(), TagDeleteError> {
+    ) -> Result<(), crate::errors::use_case::TagDeleteError> {
         pub use authios_sdk::params::UserSdkAuthorizeParams;
         
-        type Error = TagDeleteError;
+        type Error = crate::errors::use_case::TagDeleteError;
 
         let mut client = client.acquire()
             .await
@@ -44,14 +44,4 @@ impl crate::use_cases::TagsUseCase {
 
         return Ok(());
     }
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum TagDeleteError {
-    #[error("DATABASE_CONNECTION")]
-    DatabaseConnection,
-    #[error("UNAUTHORIZED")]
-    Unauthorized,
-    #[error("NOT_EXIST")]
-    NotExist
 }

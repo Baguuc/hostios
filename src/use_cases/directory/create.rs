@@ -14,12 +14,12 @@ impl crate::use_cases::DirectoriesUseCase {
         params: &crate::params::use_case::DirectoryCreateParams, 
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>,
         fql_client: &std::sync::Arc<crate::fql::Client>
-    ) -> Result<(), DirectoryCreateError> {
+    ) -> Result<(), crate::errors::use_case::DirectoryCreateError> {
         use crate::repositories::directories::create::DirectoryCreateError as RepoError;
         use crate::repositories::DirectoriesRepository;
         use authios_sdk::params::UserSdkAuthorizeParams;
         
-        type Error = DirectoryCreateError;
+        type Error = crate::errors::use_case::DirectoryCreateError;
 
         let authorize_params = UserSdkAuthorizeParams {
             token: params.user_token.clone(),
@@ -41,16 +41,4 @@ impl crate::use_cases::DirectoriesUseCase {
 
         return Ok(());
     }
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum DirectoryCreateError {
-    #[error("DATABASE_CONNECTION")]
-    DatabaseConnection,
-    #[error("UNAUTHORIZED")]
-    Unauthorized,
-    #[error("ALREADY_EXIST")]
-    AlreadyExist,
-    #[error("INVALID_PATH")]
-    InvalidPath
 }

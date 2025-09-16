@@ -11,11 +11,11 @@ impl crate::use_cases::FilesUseCase {
         params: &crate::params::use_case::FileReadParams, 
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>,
         fql_client: &std::sync::Arc<crate::fql::Client>
-    ) -> Result<String, FileReadError> {
+    ) -> Result<String, crate::errors::use_case::FileReadError> {
         use crate::repositories::files::read::FileReadError as RepoError;
         use authios_sdk::params::UserSdkAuthorizeParams;
         
-        type Error = FileReadError;
+        type Error = crate::errors::use_case::FileReadError;
 
         let authorize_params = UserSdkAuthorizeParams {
             token: params.user_token.clone(),
@@ -37,14 +37,4 @@ impl crate::use_cases::FilesUseCase {
 
         return Ok(data);
     }
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum FileReadError {
-    #[error("UNAUTHORIZED")]
-    Unauthorized,
-    #[error("INVALID_PATH")]
-    InvalidPath,
-    #[error("INVALID_PATH")]
-    NotExist
 }

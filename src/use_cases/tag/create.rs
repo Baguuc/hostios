@@ -13,10 +13,10 @@ impl crate::use_cases::TagsUseCase {
         params: &crate::params::use_case::TagCreateParams, 
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>, 
         client: A
-    ) -> Result<(), TagCreateError> {
+    ) -> Result<(), crate::errors::use_case::TagCreateError> {
         pub use authios_sdk::params::UserSdkAuthorizeParams;
         
-        type Error = TagCreateError;
+        type Error = crate::errors::use_case::TagCreateError;
 
         let mut client = client.acquire()
             .await
@@ -43,14 +43,4 @@ impl crate::use_cases::TagsUseCase {
 
         return Ok(());
     }
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum TagCreateError {
-    #[error("DATABASE_CONNECTION")]
-    DatabaseConnection,
-    #[error("UNAUTHORIZED")]
-    Unauthorized,
-    #[error("ALREADY_EXIST")]
-    AlreadyExist
 }

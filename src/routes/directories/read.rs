@@ -6,13 +6,9 @@ pub async fn controller(
     fql_client: actix_web::web::Data<crate::fql::Client>
 ) -> actix_web::HttpResponse {
     use actix_web::HttpResponse;
-    use crate::use_cases::directory::{
-        DirectoriesUseCase,
-        read::{
-            DirectoryReadError as Error
-        }
-    };
+    use crate::use_cases::directory::DirectoriesUseCase;
     use crate::params::use_case::DirectoryReadParams as Params;
+    use crate::errors::use_case::DirectoryReadError as Error;
      
     let user_token = match req.headers().get("Authorization") {
         Some(token) => match token.to_str() {

@@ -14,12 +14,12 @@ impl crate::use_cases::DirectoriesUseCase {
         params: &crate::params::use_case::DirectoryDeleteParams, 
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>,
         fql_client: &std::sync::Arc<crate::fql::Client>
-    ) -> Result<(), DirectoryDeleteError> {
+    ) -> Result<(), crate::errors::use_case::DirectoryDeleteError> {
         use crate::repositories::directories::delete::DirectoryDeleteError as RepoDeleteError;
         use crate::repositories::directories::read::DirectoryReadError as RepoReadError;
         use authios_sdk::params::UserSdkAuthorizeParams;
         
-        type Error = DirectoryDeleteError;
+        type Error = crate::errors::use_case::DirectoryDeleteError;
 
         let authorize_params = UserSdkAuthorizeParams {
             token: params.user_token.clone(),
@@ -48,16 +48,4 @@ impl crate::use_cases::DirectoriesUseCase {
 
         return Ok(());
     }
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum DirectoryDeleteError {
-    #[error("UNAUTHORIZED")]
-    Unauthorized,
-    #[error("INVALID_PATH")]
-    InvalidPath,
-    #[error("NOT_EXIST")]
-    NotExist,
-    #[error("NOT_EMPTY")]
-    NotEmpty,
 }

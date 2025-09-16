@@ -7,13 +7,9 @@ pub async fn controller(
     database_client: actix_web::web::Data<sqlx::PgPool>
 ) -> actix_web::HttpResponse {
     use actix_web::HttpResponse;
-    use crate::use_cases::file_tag::{
-        FileTagsUseCase,
-        add::{
-            FileTagAddError as Error
-        }
-    };
+    use crate::use_cases::file_tag::FileTagsUseCase;
     use crate::params::use_case::FileTagAddParams as Params;
+    use crate::errors::use_case::FileTagAddError as Error;
      
     let user_token = match req.headers().get("Authorization") {
         Some(token) => match token.to_str() {

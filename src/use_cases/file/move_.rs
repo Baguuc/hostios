@@ -14,11 +14,11 @@ impl crate::use_cases::FilesUseCase {
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>,
         fql_client: &std::sync::Arc<crate::fql::Client>,
         client: A
-    ) -> Result<(), FileMoveError> {
+    ) -> Result<(), crate::errors::use_case::FileMoveError> {
         use crate::repositories::files::move_::FileMoveError as RepoMoveError;
         use authios_sdk::params::UserSdkAuthorizeParams;
         
-        type Error = FileMoveError;
+        type Error = crate::errors::use_case::FileMoveError;
 
         let mut client = client.acquire()
             .await
@@ -55,18 +55,4 @@ impl crate::use_cases::FilesUseCase {
 
         return Ok(());
     }
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum FileMoveError {
-    #[error("DatabaseConnection")]
-    DatabaseConnection,
-    #[error("UNAUTHORIZED")]
-    Unauthorized,
-    #[error("INVALID_PATH")]
-    InvalidPath,
-    #[error("NOT_EXIST")]
-    NotExist,
-    #[error("NEW_PARENT_NOT_EXIST")]
-    NewParentNotExist
 }

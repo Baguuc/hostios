@@ -13,11 +13,11 @@ impl crate::use_cases::DirectoriesUseCase {
         params: &crate::params::use_case::DirectoryReadParams, 
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>,
         fql_client: &std::sync::Arc<crate::fql::Client>
-    ) -> Result<Vec<crate::models::Entry>, DirectoryReadError> {
+    ) -> Result<Vec<crate::models::Entry>, crate::errors::use_case::DirectoryReadError> {
         use crate::repositories::directories::read::DirectoryReadError as RepoError;
         use authios_sdk::params::UserSdkAuthorizeParams;
         
-        type Error = DirectoryReadError;
+        type Error = crate::errors::use_case::DirectoryReadError;
 
         let authorize_params = UserSdkAuthorizeParams {
             token: params.user_token.clone(),
@@ -39,14 +39,4 @@ impl crate::use_cases::DirectoriesUseCase {
 
         return Ok(result);
     }
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum DirectoryReadError {
-    #[error("UNAUTHORIZED")]
-    Unauthorized,
-    #[error("INVALID_PATH")]
-    InvalidPath,
-    #[error("NOT_EXIST")]
-    NotExist,
 }
