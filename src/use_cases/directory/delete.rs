@@ -11,7 +11,7 @@ impl crate::use_cases::DirectoriesUseCase {
     /// + when the directory is not empty;
     ///
     pub async fn delete(
-        params: &DirectoryDeleteParams, 
+        params: &crate::params::use_case::DirectoryDeleteParams, 
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>,
         fql_client: &std::sync::Arc<crate::fql::Client>
     ) -> Result<(), DirectoryDeleteError> {
@@ -48,11 +48,6 @@ impl crate::use_cases::DirectoriesUseCase {
 
         return Ok(());
     }
-}
-
-pub struct DirectoryDeleteParams {
-    pub path: String,
-    pub user_token: String
 }
 
 #[derive(thiserror::Error, Debug)]

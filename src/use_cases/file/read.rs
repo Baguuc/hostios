@@ -8,7 +8,7 @@ impl crate::use_cases::FilesUseCase {
     /// + when user is not authorized to use this function;
     ///
     pub async fn read(
-        params: &FileReadParams, 
+        params: &crate::params::use_case::FileReadParams, 
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>,
         fql_client: &std::sync::Arc<crate::fql::Client>
     ) -> Result<String, FileReadError> {
@@ -37,11 +37,6 @@ impl crate::use_cases::FilesUseCase {
 
         return Ok(data);
     }
-}
-
-pub struct FileReadParams {
-    pub file_path: String,
-    pub user_token: String
 }
 
 #[derive(thiserror::Error, Debug)]

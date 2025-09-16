@@ -10,10 +10,10 @@ pub async fn controller(
     use crate::use_cases::file_tag::{
         FileTagsUseCase,
         remove::{
-            FileTagRemoveParams as Params,
             FileTagRemoveError as Error
         }
     };
+    use crate::params::use_case::FileTagRemoveParams as Params;
      
     let user_token = match req.headers().get("Authorization") {
         Some(token) => match token.to_str() {

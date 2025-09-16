@@ -9,10 +9,10 @@ pub async fn controller(
     use crate::use_cases::directory::{
         DirectoriesUseCase,
         read::{
-            DirectoryReadParams as Params,
             DirectoryReadError as Error
         }
     };
+    use crate::params::use_case::DirectoryReadParams as Params;
      
     let user_token = match req.headers().get("Authorization") {
         Some(token) => match token.to_str() {

@@ -9,10 +9,10 @@ pub async fn controller(
     use crate::use_cases::tag::{
         TagsUseCase,
         create::{
-            TagCreateParams as Params,
             TagCreateError as Error
         }
     };
+    use crate::params::use_case::TagCreateParams as Params;
      
     let user_token = match req.headers().get("Authorization") {
         Some(token) => match token.to_str() {

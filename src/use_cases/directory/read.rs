@@ -10,7 +10,7 @@ impl crate::use_cases::DirectoriesUseCase {
     /// + when the directory do not exist;
     ///
     pub async fn read(
-        params: &DirectoryReadParams, 
+        params: &crate::params::use_case::DirectoryReadParams, 
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>,
         fql_client: &std::sync::Arc<crate::fql::Client>
     ) -> Result<Vec<crate::models::Entry>, DirectoryReadError> {
@@ -39,11 +39,6 @@ impl crate::use_cases::DirectoriesUseCase {
 
         return Ok(result);
     }
-}
-
-pub struct DirectoryReadParams {
-    pub path: String,
-    pub user_token: String
 }
 
 #[derive(thiserror::Error, Debug)]

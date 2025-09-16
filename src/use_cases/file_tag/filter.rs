@@ -10,7 +10,7 @@ impl crate::use_cases::FileTagsUseCase {
     /// + when the database connection cannot be acquired;
     ///
     pub async fn filter<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
-        params: &FileTagFilterParams, 
+        params: &crate::params::use_case::FileTagFilterParams, 
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>, 
         client: A
     ) -> Result<Vec<String>, FileTagFilterError> {
@@ -47,11 +47,6 @@ impl crate::use_cases::FileTagsUseCase {
 
         return Ok(data);
     }
-}
-
-pub struct FileTagFilterParams {
-    pub tag_name: String,
-    pub user_token: String
 }
 
 #[derive(thiserror::Error, Debug)]

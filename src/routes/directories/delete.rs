@@ -9,10 +9,10 @@ pub async fn controller(
     use crate::use_cases::directory::{
         DirectoriesUseCase,
         delete::{
-            DirectoryDeleteParams as Params,
             DirectoryDeleteError as Error
         }
     };
+    use crate::params::use_case::DirectoryDeleteParams as Params;
      
     let user_token = match req.headers().get("Authorization") {
         Some(token) => match token.to_str() {

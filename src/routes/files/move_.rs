@@ -11,10 +11,10 @@ pub async fn controller(
     use crate::use_cases::file::{
         FilesUseCase,
         move_::{
-            FileMoveParams as Params,
             FileMoveError as Error
         }
     };
+    use crate::params::use_case::file::FileMoveParams as Params;
      
     let user_token = match req.headers().get("Authorization") {
         Some(token) => match token.to_str() {

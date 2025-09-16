@@ -10,7 +10,7 @@ impl crate::use_cases::FilesUseCase {
     /// + when database connection cannot be acquired;
     ///
     pub async fn move_<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
-        params: &FileMoveParams, 
+        params: &crate::params::use_case::FileMoveParams, 
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>,
         fql_client: &std::sync::Arc<crate::fql::Client>,
         client: A
@@ -55,12 +55,6 @@ impl crate::use_cases::FilesUseCase {
 
         return Ok(());
     }
-}
-
-pub struct FileMoveParams {
-    pub file_path: String,
-    pub new_file_path: String,
-    pub user_token: String
 }
 
 #[derive(thiserror::Error, Debug)]

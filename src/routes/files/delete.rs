@@ -10,10 +10,10 @@ pub async fn controller(
     use crate::use_cases::file::{
         FilesUseCase,
         delete::{
-            FileDeleteParams as Params,
             FileDeleteError as Error
         }
     };
+    use crate::params::use_case::FileDeleteParams as Params;
      
     let user_token = match req.headers().get("Authorization") {
         Some(token) => match token.to_str() {

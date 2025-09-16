@@ -11,7 +11,7 @@ impl crate::use_cases::DirectoriesUseCase {
     /// + when the database connection cannot be acquired;
     ///
     pub async fn create(
-        params: &DirectoryCreateParams, 
+        params: &crate::params::use_case::DirectoryCreateParams, 
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>,
         fql_client: &std::sync::Arc<crate::fql::Client>
     ) -> Result<(), DirectoryCreateError> {
@@ -41,11 +41,6 @@ impl crate::use_cases::DirectoriesUseCase {
 
         return Ok(());
     }
-}
-
-pub struct DirectoryCreateParams {
-    pub path: String,
-    pub user_token: String
 }
 
 #[derive(thiserror::Error, Debug)]

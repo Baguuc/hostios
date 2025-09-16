@@ -13,7 +13,7 @@ impl crate::use_cases::FileTagsUseCase {
     /// + when the database connection cannot be acquired;
     ///
     pub async fn add<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
-        params: &FileTagAddParams, 
+        params: &crate::params::use_case::FileTagAddParams, 
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>, 
         fql_client: &std::sync::Arc<crate::fql::Client>, 
         client: A
@@ -63,12 +63,6 @@ impl crate::use_cases::FileTagsUseCase {
 
         return Ok(());
     }
-}
-
-pub struct FileTagAddParams {
-    pub tag_name: String,
-    pub file_path: crate::models::Path,
-    pub user_token: String
 }
 
 #[derive(thiserror::Error, Debug)]

@@ -11,7 +11,7 @@ impl crate::use_cases::FilesUseCase {
     /// + when the file not exist;
     ///
     pub async fn delete<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
-        params: &FileDeleteParams, 
+        params: &crate::params::use_case::FileDeleteParams, 
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>,
         fql_client: &std::sync::Arc<crate::fql::Client>,
         client: A
@@ -46,11 +46,6 @@ impl crate::use_cases::FilesUseCase {
 
         return Ok(());
     }
-}
-
-pub struct FileDeleteParams {
-    pub file_path: String,
-    pub user_token: String
 }
 
 #[derive(thiserror::Error, Debug)]
