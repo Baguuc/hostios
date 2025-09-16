@@ -23,6 +23,6 @@ FROM alpine:latest AS final
 
 WORKDIR /app
 
-COPY --from=build /build/target/x86_64-unknown-linux-musl/release/hostios-presentation /usr/local/bin/hostios
+COPY --from=build /build/target/x86_64-unknown-linux-musl/release/hostios /usr/local/bin/hostios
 
 CMD ["hostios", "run"]
