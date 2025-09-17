@@ -16,6 +16,7 @@ impl crate::use_cases::FilesUseCase {
         client: A
     ) -> Result<(), crate::errors::use_case::FileMoveError> {
         use crate::repositories::files::move_::FileMoveError as RepoMoveError;
+        use crate::params::repository::FileMoveParams;
         use authios_sdk::params::UserSdkAuthorizeParams;
         
         type Error = crate::errors::use_case::FileMoveError;
@@ -45,7 +46,7 @@ impl crate::use_cases::FilesUseCase {
             return Err(Error::NotExist);
         }
 
-        let _ = crate::repositories::FilesRepository::move_(&params.file_path, &params.new_file_path, fql_client, &mut *client)
+        let _ = crate::repositories::FilesRepository::move_(FileMoveParams { path: params.file_path.clone(), new_path: params.new_file_path.clone() }, fql_client, &mut *client)
             .await
             .map_err(|error| match error {
                 RepoMoveError::InvalidPath => Error::InvalidPath,

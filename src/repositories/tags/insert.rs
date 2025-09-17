@@ -3,14 +3,17 @@ impl crate::repositories::TagsRepository {
     /// 
     /// insert a tag
     ///
-    pub async fn insert<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(name: &String, description: &String, client: A) -> Result<(), sqlx::Error> {
+    pub async fn insert<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
+        params: crate::params::repository::TagInsertParams,
+        client: A
+    ) -> Result<(), sqlx::Error> {
         let mut client = client.acquire().await?;
 
         let sql = "INSERT INTO tags (name, description) VALUES ($1, $2);";
 
         sqlx::query(sql)
-            .bind(name)
-            .bind(description)
+            .bind(&params.name)
+            .bind(&params.description)
             .execute(&mut *client)
             .await?;
 

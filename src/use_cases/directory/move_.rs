@@ -16,7 +16,11 @@ impl crate::use_cases::DirectoriesUseCase {
     ) -> Result<(), crate::errors::use_case::DirectoryMoveError> {
         use crate::repositories::directories::move_::DirectoryMoveError as RepoMoveError;
         use crate::repositories::directories::read::DirectoryReadError as RepoReadError;
-        pub use authios_sdk::params::UserSdkAuthorizeParams;
+        use crate::params::repository::{
+            DirectoryReadParams,
+            DirectoryMoveParams
+        };
+        use authios_sdk::params::UserSdkAuthorizeParams;
         
         type Error = crate::errors::use_case::DirectoryMoveError;
 
@@ -31,14 +35,14 @@ impl crate::use_cases::DirectoriesUseCase {
             Err(_) | Ok(false) => return Err(Error::Unauthorized)
         };
         
-        let _ = crate::repositories::DirectoriesRepository::read(&params.path, fql_client)
+        let _ = crate::repositories::DirectoriesRepository::read(DirectoryReadParams { path: params.path.clone() }, fql_client)
             .await
             .map_err(|error| match error {
                 RepoReadError::InvalidPath => Error::InvalidPath,
                 RepoReadError::NotExist => Error::NotExist
             })?;
         
-        let _ = crate::repositories::DirectoriesRepository::move_(&params.path, &params.new_path, fql_client)
+        let _ = crate::repositories::DirectoriesRepository::move_(DirectoryMoveParams { path: params.path.clone(), new_path: params.new_path.clone() }, fql_client)
             .await
             .map_err(|error| match error {
                 RepoMoveError::InvalidPath => Error::InvalidPath,

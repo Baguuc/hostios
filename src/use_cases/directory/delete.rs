@@ -17,6 +17,10 @@ impl crate::use_cases::DirectoriesUseCase {
     ) -> Result<(), crate::errors::use_case::DirectoryDeleteError> {
         use crate::repositories::directories::delete::DirectoryDeleteError as RepoDeleteError;
         use crate::repositories::directories::read::DirectoryReadError as RepoReadError;
+        use crate::params::repository::{
+            DirectoryDeleteParams,
+            DirectoryReadParams
+        };
         use authios_sdk::params::UserSdkAuthorizeParams;
         
         type Error = crate::errors::use_case::DirectoryDeleteError;
@@ -32,14 +36,14 @@ impl crate::use_cases::DirectoriesUseCase {
             Err(_) | Ok(false) => return Err(Error::Unauthorized)
         };
         
-        let _ = crate::repositories::DirectoriesRepository::read(&params.path, fql_client)
+        let _ = crate::repositories::DirectoriesRepository::read(DirectoryReadParams { path: params.path.clone() }, fql_client)
             .await
             .map_err(|error| match error {
                 RepoReadError::InvalidPath => Error::InvalidPath,
                 RepoReadError::NotExist => Error::NotExist
             })?;
         
-        let _ = crate::repositories::DirectoriesRepository::delete(&params.path, fql_client)
+        let _ = crate::repositories::DirectoriesRepository::delete(DirectoryDeleteParams { path: params.path.clone() }, fql_client)
             .await
             .map_err(|error| match error {
                 RepoDeleteError::InvalidPath => Error::InvalidPath,

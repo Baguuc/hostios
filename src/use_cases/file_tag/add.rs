@@ -18,7 +18,11 @@ impl crate::use_cases::FileTagsUseCase {
         fql_client: &std::sync::Arc<crate::fql::Client>, 
         client: A
     ) -> Result<(), crate::errors::use_case::FileTagAddError> {
-        pub use authios_sdk::params::UserSdkAuthorizeParams;
+        use crate::params::repository::{
+            FileTagInsertParams,
+            TagRetrieveParams
+        };
+        use authios_sdk::params::UserSdkAuthorizeParams;
         
         type Error = crate::errors::use_case::FileTagAddError;
 
@@ -49,13 +53,15 @@ impl crate::use_cases::FileTagsUseCase {
             return Err(Error::PathNotExist);
         }
         
-        if crate::repositories::TagsRepository::retrieve(&params.tag_name, &mut *client).await.is_err() {
+        if crate::repositories::TagsRepository::retrieve(TagRetrieveParams { name: params.tag_name.clone() }, &mut *client).await.is_err() {
             return Err(Error::TagNotExist);
         }
 
         crate::repositories::FileTagsRepository::insert(
-            &params.file_path,
-            &params.tag_name,
+            FileTagInsertParams {
+                path: params.file_path.to_string(),
+                tag_name: params.tag_name.clone(),
+            },
             &mut *client
         )
             .await

@@ -14,7 +14,11 @@ impl crate::use_cases::TagsUseCase {
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>, 
         client: A
     ) -> Result<(), crate::errors::use_case::TagDeleteError> {
-        pub use authios_sdk::params::UserSdkAuthorizeParams;
+        use crate::params::repository::{
+            TagDeleteParams,
+            TagRetrieveParams
+        };
+        use authios_sdk::params::UserSdkAuthorizeParams;
         
         type Error = crate::errors::use_case::TagDeleteError;
 
@@ -33,12 +37,12 @@ impl crate::use_cases::TagsUseCase {
             Err(_) | Ok(false) => return Err(Error::Unauthorized)
         };
 
-        if crate::repositories::TagsRepository::retrieve(&params.name, &mut *client).await.is_err() {
+        if crate::repositories::TagsRepository::retrieve(TagRetrieveParams { name: params.name.clone() }, &mut *client).await.is_err() {
             return Err(Error::NotExist);
         }
 
         let _ = crate::repositories::TagsRepository::delete(
-            &params.name,
+            TagDeleteParams { name: params.name.clone() },
             &mut *client
         ).await;
 

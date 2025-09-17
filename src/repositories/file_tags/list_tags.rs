@@ -3,13 +3,16 @@ impl crate::repositories::FileTagsRepository {
     ///
     /// list tags associated with provided file path
     ///
-    pub async fn list_tags<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(path: &crate::models::Path, client: A) -> Result<Vec<String>, sqlx::Error>  {
+    pub async fn list_tags<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
+        params: crate::params::repository::FileTagListTagsParams,
+        client: A
+    ) -> Result<Vec<String>, sqlx::Error>  {
         let mut client = client.acquire().await?;
         
         let sql = "SELECT tag_name FROM file_tags WHERE file_path = $1;"; 
 
         let data: Vec<(String,)> = sqlx::query_as(sql)
-            .bind(path.to_string())
+            .bind(params.path)
             .fetch_all(&mut *client)
             .await?;
         let data = data

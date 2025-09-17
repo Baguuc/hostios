@@ -4,8 +4,7 @@ impl crate::repositories::FilesRepository {
     /// move a file
     ///
     pub async fn move_<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
-        path: &String, 
-        new_path: &String, 
+        params: crate::params::repository::FileMoveParams,
         fql_client: &std::sync::Arc<crate::fql::Client>,
         client: A
     ) -> Result<(), FileMoveError> {
@@ -15,7 +14,7 @@ impl crate::repositories::FilesRepository {
             .await
             .map_err(|_| Error::DatabaseConnection)?;
 
-        let statement = crate::fql::Statement::parse(format!("MOVE FILE {}, {};", path, new_path))
+        let statement = crate::fql::Statement::parse(format!("MOVE FILE {}, {};", params.path, params.new_path))
             .map_err(|_| Error::InvalidPath)?;
 
         let _ = fql_client.execute(statement)
@@ -24,8 +23,8 @@ impl crate::repositories::FilesRepository {
         
         let sql = "UPDATE file_tags SET file_path = $2 WHERE file_path = $1;";
         let _ = sqlx::query(sql)
-            .bind(path)
-            .bind(new_path)
+            .bind(params.path)
+            .bind(params.new_path)
             .execute(&mut *client)
             .await;
 

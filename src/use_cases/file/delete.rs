@@ -17,6 +17,7 @@ impl crate::use_cases::FilesUseCase {
         client: A
     ) -> Result<(), crate::errors::use_case::FileDeleteError> {
         use crate::repositories::files::delete::FileDeleteError as RepoError;
+        use crate::params::repository::FileDeleteParams;
         use authios_sdk::params::UserSdkAuthorizeParams;
         
         type Error = crate::errors::use_case::FileDeleteError;
@@ -36,7 +37,7 @@ impl crate::use_cases::FilesUseCase {
             Err(_) | Ok(false) => return Err(Error::Unauthorized)
         };
 
-        let _ = crate::repositories::FilesRepository::delete(&params.file_path, fql_client, &mut *client)
+        let _ = crate::repositories::FilesRepository::delete(FileDeleteParams { path: params.file_path.clone() }, fql_client, &mut *client)
             .await
             .map_err(|error| match error {
                 RepoError::InvalidPath => Error::InvalidPath,

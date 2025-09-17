@@ -15,6 +15,7 @@ impl crate::use_cases::DirectoriesUseCase {
         fql_client: &std::sync::Arc<crate::fql::Client>
     ) -> Result<Vec<crate::models::Entry>, crate::errors::use_case::DirectoryReadError> {
         use crate::repositories::directories::read::DirectoryReadError as RepoError;
+        use crate::params::repository::DirectoryReadParams;
         use authios_sdk::params::UserSdkAuthorizeParams;
         
         type Error = crate::errors::use_case::DirectoryReadError;
@@ -30,7 +31,7 @@ impl crate::use_cases::DirectoriesUseCase {
             Err(_) | Ok(false) => return Err(Error::Unauthorized)
         };
         
-        let result = crate::repositories::DirectoriesRepository::read(&params.path, fql_client)
+        let result = crate::repositories::DirectoriesRepository::read(DirectoryReadParams { path: params.path.clone() }, fql_client)
             .await
             .map_err(|error| match error {
                 RepoError::InvalidPath => Error::InvalidPath,

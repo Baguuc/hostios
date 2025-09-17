@@ -4,12 +4,12 @@ impl crate::repositories::DirectoriesRepository {
     /// create a directory
     ///
     pub async fn create(
-        path: &String, 
+        params: crate::params::repository::DirectoryCreateParams, 
         fql_client: &std::sync::Arc<crate::fql::Client>
     ) -> Result<(), DirectoryCreateError> {
         type Error = DirectoryCreateError; 
         
-        let statement = crate::fql::Statement::parse(format!("CREATE DIR {};", path))
+        let statement = crate::fql::Statement::parse(format!("CREATE DIR {};", params.path))
             .map_err(|_| Error::InvalidPath)?;
 
         fql_client.execute(statement)

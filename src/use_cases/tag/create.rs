@@ -14,7 +14,8 @@ impl crate::use_cases::TagsUseCase {
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>, 
         client: A
     ) -> Result<(), crate::errors::use_case::TagCreateError> {
-        pub use authios_sdk::params::UserSdkAuthorizeParams;
+        use crate::params::repository::TagInsertParams;
+        use authios_sdk::params::UserSdkAuthorizeParams;
         
         type Error = crate::errors::use_case::TagCreateError;
 
@@ -34,8 +35,10 @@ impl crate::use_cases::TagsUseCase {
         };
 
         crate::repositories::TagsRepository::insert(
-            &params.name,
-            &params.description,
+            TagInsertParams {
+                name: params.name.clone(),
+                description: params.description.clone()
+            },
             &mut *client
         )
             .await

@@ -14,7 +14,11 @@ impl crate::use_cases::FileTagsUseCase {
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>, 
         client: A
     ) -> Result<Vec<String>, crate::errors::use_case::FileTagFilterError> {
-        pub use authios_sdk::params::UserSdkAuthorizeParams;
+        use crate::params::repository::{
+            FileTagListPathsParams,
+            TagRetrieveParams
+        };
+        use authios_sdk::params::UserSdkAuthorizeParams;
         
         type Error = crate::errors::use_case::FileTagFilterError;
 
@@ -33,12 +37,12 @@ impl crate::use_cases::FileTagsUseCase {
             Err(_) | Ok(false) => return Err(Error::Unauthorized)
         };
         
-        if crate::repositories::TagsRepository::retrieve(&params.tag_name, &mut *client).await.is_err() {
+        if crate::repositories::TagsRepository::retrieve(TagRetrieveParams { name: params.tag_name.clone() }, &mut *client).await.is_err() {
             return Err(Error::TagNotExist);
         }
 
         let data = crate::repositories::FileTagsRepository::list_paths(
-            &params.tag_name,
+            FileTagListPathsParams { tag_name: params.tag_name.clone() },
             &mut *client
         )
             .await

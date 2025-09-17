@@ -4,12 +4,12 @@ impl crate::repositories::DirectoriesRepository {
     /// delete a directory
     ///
     pub async fn delete(
-        path: &String, 
+        params: crate::params::repository::DirectoryDeleteParams, 
         fql_client: &std::sync::Arc<crate::fql::Client>
     ) -> Result<(), DirectoryDeleteError> {
         type Error = DirectoryDeleteError; 
         
-        let statement = crate::fql::Statement::parse(format!("DELETE DIR {};", path))
+        let statement = crate::fql::Statement::parse(format!("DELETE DIR {};", params.path))
             .map_err(|_| Error::InvalidPath)?;
 
         fql_client.execute(statement)

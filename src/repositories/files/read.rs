@@ -4,12 +4,12 @@ impl crate::repositories::FilesRepository {
     /// read a file
     ///
     pub async fn read(
-        path: &String, 
+        params: crate::params::repository::FileReadParams, 
         fql_client: &std::sync::Arc<crate::fql::Client>
     ) -> Result<String, FileReadError> {
         type Error = FileReadError; 
 
-        let statement = crate::fql::Statement::parse(format!("READ FILE {};", path))
+        let statement = crate::fql::Statement::parse(format!("READ FILE {};", params.path))
             .map_err(|_| Error::InvalidPath)?;
 
         let result = fql_client.execute(statement)

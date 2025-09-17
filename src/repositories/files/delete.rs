@@ -4,7 +4,7 @@ impl crate::repositories::FilesRepository {
     /// delete a file
     ///
     pub async fn delete<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
-        path: &String, 
+        params: crate::params::repository::FileDeleteParams, 
         fql_client: &std::sync::Arc<crate::fql::Client>,
         client: A
     ) -> Result<(), FileDeleteError> {
@@ -14,7 +14,7 @@ impl crate::repositories::FilesRepository {
             .await
             .map_err(|_| Error::DatabaseConnection)?;
         
-        let statement = crate::fql::Statement::parse(format!("DELETE FILE {};", path))
+        let statement = crate::fql::Statement::parse(format!("DELETE FILE {};", params.path.clone()))
             .map_err(|_| Error::InvalidPath)?;
 
         fql_client.execute(statement)
@@ -23,7 +23,7 @@ impl crate::repositories::FilesRepository {
 
         let sql = "DELETE FROM file_tags WHERE file_path = $1;";
         let _ = sqlx::query(sql)
-            .bind(path)
+            .bind(params.path.clone())
             .execute(&mut *client)
             .await;
 

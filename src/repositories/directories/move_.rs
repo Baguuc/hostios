@@ -4,13 +4,12 @@ impl crate::repositories::DirectoriesRepository {
     /// move a directory
     ///
     pub async fn move_(
-        path: &String, 
-        new_path: &String, 
+        params: crate::params::repository::DirectoryMoveParams,
         fql_client: &std::sync::Arc<crate::fql::Client>
     ) -> Result<(), DirectoryMoveError> {
         type Error = DirectoryMoveError; 
 
-        let statement = crate::fql::Statement::parse(format!("MOVE DIR {}, {};", path, new_path))
+        let statement = crate::fql::Statement::parse(format!("MOVE DIR {}, {};", params.path, params.new_path))
             .map_err(|_| Error::InvalidPath)?;
 
         let _ = fql_client.execute(statement)

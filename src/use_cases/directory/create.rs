@@ -11,12 +11,13 @@ impl crate::use_cases::DirectoriesUseCase {
     /// + when the database connection cannot be acquired;
     ///
     pub async fn create(
-        params: &crate::params::use_case::DirectoryCreateParams, 
+        params: &crate::params::use_case::DirectoryCreateParams,
         _authios_sdk: &std::sync::Arc<authios_sdk::AuthiosSdk>,
         fql_client: &std::sync::Arc<crate::fql::Client>
     ) -> Result<(), crate::errors::use_case::DirectoryCreateError> {
         use crate::repositories::directories::create::DirectoryCreateError as RepoError;
         use crate::repositories::DirectoriesRepository;
+        use crate::params::repository::DirectoryCreateParams;
         use authios_sdk::params::UserSdkAuthorizeParams;
         
         type Error = crate::errors::use_case::DirectoryCreateError;
@@ -32,7 +33,7 @@ impl crate::use_cases::DirectoriesUseCase {
             Err(_) | Ok(false) => return Err(Error::Unauthorized)
         };
         
-        let _ = DirectoriesRepository::create(&params.path, fql_client)
+        let _ = DirectoriesRepository::create(DirectoryCreateParams { path: params.path.to_string() }, fql_client)
             .await
             .map_err(|error| match error {
                 RepoError::InvalidPath => Error::InvalidPath,

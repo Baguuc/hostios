@@ -4,12 +4,12 @@ impl crate::repositories::DirectoriesRepository {
     /// read a directory
     ///
     pub async fn read(
-        path: &String, 
+        params: crate::params::repository::DirectoryReadParams,
         fql_client: &std::sync::Arc<crate::fql::Client>
     ) -> Result<Vec<crate::models::Entry>, DirectoryReadError> {
         type Error = DirectoryReadError; 
 
-        let statement = crate::fql::Statement::parse(format!("READ DIR {};", path))
+        let statement = crate::fql::Statement::parse(format!("READ DIR {};", params.path))
             .map_err(|_| Error::InvalidPath)?;
 
         let result = fql_client.execute(statement)

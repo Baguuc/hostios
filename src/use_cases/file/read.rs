@@ -13,6 +13,7 @@ impl crate::use_cases::FilesUseCase {
         fql_client: &std::sync::Arc<crate::fql::Client>
     ) -> Result<String, crate::errors::use_case::FileReadError> {
         use crate::repositories::files::read::FileReadError as RepoError;
+        use crate::params::repository::FileReadParams;
         use authios_sdk::params::UserSdkAuthorizeParams;
         
         type Error = crate::errors::use_case::FileReadError;
@@ -28,7 +29,7 @@ impl crate::use_cases::FilesUseCase {
             Err(_) | Ok(false) => return Err(Error::Unauthorized)
         };
 
-        let data = crate::repositories::FilesRepository::read(&params.file_path, fql_client)
+        let data = crate::repositories::FilesRepository::read(FileReadParams { path: params.file_path.clone() }, fql_client)
             .await
             .map_err(|error| match error {
                 RepoError::InvalidPath => Error::InvalidPath,
