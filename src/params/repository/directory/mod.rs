@@ -4,8 +4,8 @@ pub use create::DirectoryCreateParams;
 pub mod delete;
 pub use delete::DirectoryDeleteParams;
 
-pub mod move_;
-pub use move_::DirectoryMoveParams;
+pub mod mv;
+pub use mv::DirectoryMoveParams;
 
 pub mod read;
 pub use read::DirectoryReadParams;

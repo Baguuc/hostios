@@ -12,18 +12,3 @@ pub use file::{
     FileMoveParams,
     FileReadParams,
 };
-
-pub mod tag;
-pub use tag::{
-    TagInsertParams,
-    TagDeleteParams,
-    TagRetrieveParams
-};
-
-pub mod file_tag;
-pub use file_tag::{
-    FileTagInsertParams,
-    FileTagDeleteParams,
-    FileTagListPathsParams,
-    FileTagListTagsParams
-};

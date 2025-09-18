@@ -1,3 +1,4 @@
 pub struct FileDeleteParams {
-    pub path: String
+    pub base_system_path: String,
+    pub internal_path: String
 }

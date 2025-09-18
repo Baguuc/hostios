@@ -1,3 +1,4 @@
 pub struct DirectoryCreateParams {
-    pub path: String
+    pub internal_path: String,
+    pub base_path: String
 }

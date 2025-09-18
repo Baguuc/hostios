@@ -1,9 +1,7 @@
-pub mod path;
 pub mod file;
 pub mod entry;
-pub mod tag;
+pub mod directory;
 
-pub use path::*;
-pub use file::*;
-pub use entry::*;
-pub use tag::*;
+pub use file::File;
+pub use directory::Directory;
+pub use entry::Entry;

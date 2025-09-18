@@ -4,7 +4,6 @@ pub mod errors;
 pub mod repositories;
 pub mod use_cases;
 pub mod utils;
-pub mod fql;
 pub mod cli;
 pub mod config;
 pub mod web;

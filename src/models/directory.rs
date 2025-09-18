@@ -1,10 +1,10 @@
 #[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
-pub struct File {
+pub struct Directory {
     name: String,
-    path: String,
+    path: String
 }
 
-impl File {
+impl Directory {
     pub fn new(path: String) -> Option<Self> {
         let path_split = path.split("/");
 

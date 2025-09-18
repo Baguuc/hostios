@@ -1,6 +1,6 @@
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-#[serde(tag = "type", content = "path", rename_all = "lowercase")]
+#[serde(tag = "type", rename_all = "lowercase")]
 pub enum Entry {
-    Directory(crate::models::Path),
-    File(crate::models::Path)
+    Directory(crate::models::Directory),
+    File(crate::models::File)
 }

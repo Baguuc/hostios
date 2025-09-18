@@ -1,5 +1,5 @@
 pub mod read;
-pub mod move_;
+pub mod mv;
 pub mod delete;
 
 /// # DirectoriesRepository (struct)

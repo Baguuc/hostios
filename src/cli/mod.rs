@@ -6,9 +6,7 @@ pub mod commands;
 #[command(about = "A remote drive API", long_about = None)]
 pub enum MainCli {
     #[command(about = "Run the HTTP server", long_about = None)]
-    Run(CliArgs),
-    #[command(about = "Run migrations on the database")]
-    Migrate(CliArgs)
+    Run(CliArgs)
 }
 
 #[derive(clap::Args, Clone)]
@@ -27,8 +25,7 @@ impl MainCli {
 
     pub async fn execute(self) {
         match self {
-            Self::Run(args) => { commands::run(args).await; },
-            Self::Migrate(args) => { commands::migrate(args).await; }
+            Self::Run(args) => { commands::run(args).await; }
         };
     }
 }

@@ -1,3 +1,4 @@
 pub struct DirectoryDeleteParams {
-    pub path: String
+    pub system_path: String,
+    pub internal_path: String
 }

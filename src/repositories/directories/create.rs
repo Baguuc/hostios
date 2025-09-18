@@ -1,29 +1,24 @@
 impl crate::repositories::DirectoriesRepository {
     /// # DirectoriesRepository::create
     ///
-    /// create a directory
+    /// create a directory while creating all parent directories as-needed.
     ///
     pub async fn create(
-        params: crate::params::repository::DirectoryCreateParams, 
-        fql_client: &std::sync::Arc<crate::fql::Client>
-    ) -> Result<(), DirectoryCreateError> {
-        type Error = DirectoryCreateError; 
-        
-        let statement = crate::fql::Statement::parse(format!("CREATE DIR {};", params.path))
-            .map_err(|_| Error::InvalidPath)?;
+        params: crate::params::repository::DirectoryCreateParams 
+    ) -> Result<(), crate::errors::repository::DirectoryCreateError> {
+        use crate::utils::path::join_paths;
+        type Error = crate::errors::repository::DirectoryCreateError;
 
-        fql_client.execute(statement)
-            .await
-            .map_err(|_| Error::AlreadyExist)?;
+        let full_path = join_paths(
+            params.base_path,
+            params.internal_path
+        );
+        
+        std::fs::create_dir_all(full_path).map_err(|error| match error.kind() {
+            std::io::ErrorKind::AlreadyExists => Error::AlreadyExist,
+            _ => panic!("An error that shouldn't happen occured. Check server configuration and base data directory system permissions.")
+        })?;
 
         return Ok(());
     }
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum DirectoryCreateError {
-    #[error("INVALID_PATH")]
-    InvalidPath,
-    #[error("ALREADY_EXIST")]
-    AlreadyExist
 }

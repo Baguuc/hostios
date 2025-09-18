@@ -3,40 +3,22 @@ impl crate::repositories::FilesRepository {
     ///
     /// delete a file
     ///
-    pub async fn delete<'a, A: sqlx::Acquire<'a, Database = sqlx::Postgres>>(
-        params: crate::params::repository::FileDeleteParams, 
-        fql_client: &std::sync::Arc<crate::fql::Client>,
-        client: A
-    ) -> Result<(), FileDeleteError> {
-        type Error = FileDeleteError;
+    pub async fn delete(
+        params: crate::params::repository::FileDeleteParams 
+    ) -> Result<(), crate::errors::repository::FileDeleteError> {
+        use crate::utils::path::join_paths;
+        type Error = crate::errors::repository::FileDeleteError;
 
-        let mut client = client.acquire()
-            .await
-            .map_err(|_| Error::DatabaseConnection)?;
-        
-        let statement = crate::fql::Statement::parse(format!("DELETE FILE {};", params.path.clone()))
-            .map_err(|_| Error::InvalidPath)?;
+        let full_path = join_paths(
+            params.base_system_path,
+            params.internal_path
+        );
 
-        fql_client.execute(statement)
-            .await
-            .map_err(|_| Error::CannotDelete)?;
-
-        let sql = "DELETE FROM file_tags WHERE file_path = $1;";
-        let _ = sqlx::query(sql)
-            .bind(params.path.clone())
-            .execute(&mut *client)
-            .await;
+        std::fs::remove_file(full_path).map_err(|error| match error.kind() {
+            std::io::ErrorKind::NotFound => Error::NotFound,
+            _ => panic!("An error that shouldn't happen occured. Check server configuration and base data directory system permissions.")
+        })?;
 
         return Ok(());
     }
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum FileDeleteError {
-    #[error("INVALID_PATH")]
-    InvalidPath,
-    #[error("CANNOT_DELETE")]
-    CannotDelete,
-    #[error("DATABASE_CONNECTION")]
-    DatabaseConnection
 }

@@ -4,26 +4,22 @@ impl crate::repositories::DirectoriesRepository {
     /// delete a directory
     ///
     pub async fn delete(
-        params: crate::params::repository::DirectoryDeleteParams, 
-        fql_client: &std::sync::Arc<crate::fql::Client>
-    ) -> Result<(), DirectoryDeleteError> {
-        type Error = DirectoryDeleteError; 
-        
-        let statement = crate::fql::Statement::parse(format!("DELETE DIR {};", params.path))
-            .map_err(|_| Error::InvalidPath)?;
+        params: crate::params::repository::DirectoryDeleteParams 
+    ) -> Result<(), crate::errors::repository::DirectoryDeleteError> {
+        use crate::utils::path::join_paths;
+        type Error = crate::errors::repository::DirectoryDeleteError;
 
-        fql_client.execute(statement)
-            .await
-            .map_err(|_| Error::CannotDelete)?;
+        let full_path = join_paths(
+            params.system_path,
+            params.internal_path
+        );
+
+        std::fs::remove_dir(full_path).map_err(|error| match error.kind() {
+            std::io::ErrorKind::NotFound => Error::NotFound,
+            std::io::ErrorKind::DirectoryNotEmpty => Error::NotEmpty,
+            _ => panic!("An error that shouldn't happen occured. Check server configuration and base data directory system permissions.")
+        })?;
 
         return Ok(());
     }
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum DirectoryDeleteError {
-    #[error("INVALID_PATH")]
-    InvalidPath,
-    #[error("CANNOT_DELETE")]
-    CannotDelete
 }

@@ -4,27 +4,18 @@ impl crate::repositories::FilesRepository {
     /// read a file
     ///
     pub async fn read(
-        params: crate::params::repository::FileReadParams, 
-        fql_client: &std::sync::Arc<crate::fql::Client>
-    ) -> Result<String, FileReadError> {
-        type Error = FileReadError; 
+        params: crate::params::repository::FileReadParams 
+    ) -> Result<String, crate::errors::repository::FileReadError> {
+        use crate::utils::path::join_paths;
+        type Error = crate::errors::repository::FileReadError;
 
-        let statement = crate::fql::Statement::parse(format!("READ FILE {};", params.path))
-            .map_err(|_| Error::InvalidPath)?;
-
-        let result = fql_client.execute(statement)
-            .await
-            .map_err(|_| Error::NotExist)?
-            .unwrap_string();
-
-        return Ok(result);
+        let full_path = join_paths(
+            params.system_base_path,
+            params.internal_path
+        );
+        let read = std::fs::read_to_string(full_path)
+            .map_err(|_| Error::NotFound)?;
+        
+        return Ok(read);
     }
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum FileReadError {
-    #[error("INVALID_PATH")]
-    InvalidPath,
-    #[error("NOT_EXIST")]
-    NotExist
 }
