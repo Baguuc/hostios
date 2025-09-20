@@ -1,5 +1,5 @@
 impl crate::use_cases::VaultUseCase {
-    /// # VaultUseCase::read
+    /// # VaultUseCase::read_directory
     ///
     /// Read directory, checking for errors
     ///

@@ -29,74 +29,56 @@ impl crate::use_cases::VaultUseCase {
                 _ => Error::CannotFetch
             })?;
         
-        let mut vault_permissions: HashMap<String, Vec<String>> = HashMap::new();
+        let mut vault_permissions: HashMap<String, Vec<UserVaultPermission>> = HashMap::new();
         
-        // TODO: extract this whole logic into authios with some method like "search_permissions"
-        // and pattern suppling like this:
-        // ```
-        // // returns a HashMap with named values
-        // sdk.search_permissions(
-        //   Params { token, pattern: String::from("hostios:vaults:{vault_id}:{vault_permission}") }
-        // )
-        // ```
         for permission_name in permissions {
             if !permission_name.starts_with("hostios:vaults:") { continue; }
             
-            // get vault id
-            let vault_id = permission_name.chars()
-                // skip "hostios:vaults:" perfix
-                .skip(15)
-                // take while another part of the permission doesn't come up 
-                .take_while(|c| *c != ':')
-                .collect::<String>();
-            let vault_id_len = vault_id.len();
+            let splitted = permission_name
+                .split(":")
+                .map(|s| s.to_string())
+                .collect::<Vec<String>>();
+
+            // 1......|2.....|3...|4...........
+            // hostios:vaults:<id>:<permission>
+            if splitted.len() != 4 { continue; }
+
+            let vault_id = splitted
+                .get(2)
+                .unwrap()
+                .to_string();
+            let permission_name = splitted
+                .get(3)
+                .unwrap();
             
-            // hostios:vaults:<id>:---read|write
-            // |             ^|  ^|   |        ^
-            // 15.............x...1---4/5.......
-            //
-            // the permission name is shorter than the bare minimum of all possibilities
-            // so it's invalid so skip
-            //
-            if permission_name.len() <= 15+vault_id_len+1+4 { continue; }
-            
-            // get the permission
-            let vault_permission = permission_name.chars()
-                // skip "hostios:vaults:" perfix
-                .skip(15+vault_id_len+1)
-                // take while another part of the permission doesn't come up
-                .collect::<String>();
-            
-            // invalid permission name
-            if vault_permission != "read" && vault_permission != "write" { continue; }
-            
-            if let Some(permissions) = vault_permissions.get_mut(&vault_id) {
-                permissions.push(vault_permission);
+            if let Some(vault) = vault_permissions.get_mut(&vault_id) {
+                let permission = match permission_name.as_str() {
+                    "read" => UserVaultPermission::Read,
+                    "write" => UserVaultPermission::Write,
+                    "manage" => UserVaultPermission::Manage,
+                    _ => continue
+                };
+                vault.push(permission); 
             } else {
-                vault_permissions.insert(vault_id, vec![vault_permission]);
+                let permission = match permission_name.as_str() {
+                    "read" => UserVaultPermission::Read,
+                    "write" => UserVaultPermission::Write,
+                    "manage" => UserVaultPermission::Manage,
+                    _ => continue
+                };
+                
+                vault_permissions.insert(vault_id, vec![permission]);                
             }
         }
 
         let mut vaults = vec![];
 
-        let read_permission = String::from("read");
-        let write_permission = String::from("write");
-        
-        // merge the permissions array into one consisten structure
-        for (key,value) in vault_permissions.iter() { 
-            if value.contains(&read_permission) && value.contains(&write_permission) {
-                vaults.push(UserVault { id: key.to_string(), permissions: UserVaultPermission::ReadWrite });
-                continue; 
-            } 
-            
-            if value.contains(&read_permission) {
-                vaults.push(UserVault { id: key.to_string(), permissions: UserVaultPermission::Read });
-                continue;
-            }
-            
-            if value.contains(&write_permission) {
-                vaults.push(UserVault { id: key.to_string(), permissions: UserVaultPermission::Write });
-            }
+        for (key,value) in vault_permissions.iter() {
+            let vault = UserVault {
+                id: key.clone(),
+                permissions: value.to_vec()
+            };
+            vaults.push(vault);
         }
 
         return Ok(vaults);
